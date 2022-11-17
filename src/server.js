@@ -11,7 +11,8 @@ app.use('/uploads',express.static('uploads'));
 app.use(morgan('dev'));
 
 // routes handler
-app.use('/api/v1/category',categoryRoute);
+app.use('/api/v1',categoryRoute);
+// app.use('/api/v1/sub-category',subCategoryRoute);
 
 const PORT = process.env.PORT || 4000;
 

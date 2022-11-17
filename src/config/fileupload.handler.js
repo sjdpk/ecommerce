@@ -1,13 +1,26 @@
 const multer = require('multer');
-
+const fs = require('fs');
 
 const storage =  multer.diskStorage({
     destination : function(req,file,cb){
-      cb(null,'./uploads')
+      const uploadDir ='./uploads';
+      if (!fs.existsSync(uploadDir))fs.mkdirSync(uploadDir);
+      if(req.baseUrl.includes('category')){
+        const dir = './uploads/category';
+        if (!fs.existsSync(dir))fs.mkdirSync(dir);
+        cb(null,dir); 
+      }else if(req.baseUrl.includes('product')){
+        const dir = './uploads/product';
+        if (!fs.existsSync(dir))fs.mkdirSync(dir);
+        cb(null,dir); 
+      }else{
+        cb(null,uploadDir);
+      }
     },
     filename : function(req,file,cb){
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-      cb(null,file.fieldname+"-"+uniqueSuffix+"-"+file.originalname)
+      const fileprefix = req.baseUrl.includes('category')?"category":req.baseUrl.includes('product')?'product':'image';
+      cb(null,fileprefix+"-"+uniqueSuffix+"-"+file.originalname)
     }
   });
 
