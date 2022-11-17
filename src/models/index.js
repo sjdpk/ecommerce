@@ -2,7 +2,7 @@ const { Sequelize,DataTypes } = require('sequelize');
 require('dotenv').config({path:"src/config/config.env"});
 
 // database connection
-const sequelize = new Sequelize(process.env.DB_URL,{logging:true});
+const sequelize = new Sequelize(process.env.DB_URL,{logging:false});
 
 //   check connection 
 sequelize.authenticate().then(()=>{

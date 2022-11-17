@@ -34,10 +34,11 @@ const createCategory = async(req,res)=>{
 // @Method : [ POST ]
 const createSubCategory = async(req,res)=>{
     const categoryId = req.body.categoryId;
-    if(!categoryId) return res.status(400).json({error:"category id is required"});
+    if(!categoryId) return res.status(400).json({error:"categoryId is required"});
+    const imagePath =req.file !=null?`${req.protocol}://${req.get('host')}/${req.file.path}`:null;
     let subCategoryData = {
         name:req.body.name,
-        image:`${req.protocol}://${req.get('host')}/${req.file.path}`,
+        image:imagePath,
         categoryId:categoryId,
     }
     try {
@@ -54,10 +55,11 @@ const createSubCategory = async(req,res)=>{
 // @Method : [ POST ]
 const createSubSubCategory = async(req,res)=>{
     const subcategoryId = req.body.subcategoryId;
-    if(!subcategoryId) return res.status(400).json({error:"subcategory id is required"});
+    if(!subcategoryId) return res.status(400).json({error:"subcategoryId is required"});
+    const imagePath =req.file !=null?`${req.protocol}://${req.get('host')}/${req.file.path}`:null;
     let subCategoryData = {
         name:req.body.name,
-        image:`${req.protocol}://${req.get('host')}/${req.file.path}`,
+        image:imagePath,
         subcategoryId:subcategoryId,
     }
     try {
@@ -65,6 +67,46 @@ const createSubSubCategory = async(req,res)=>{
         res.status(201).json(subCategory);
     } catch (error) {
         res.status(500).json({error:error.message});
+    }
+}
+
+
+async function update(req,res,DbModel,label="id"){
+    const id = req.params.id;
+    const data = await DbModel.findOne({where:{id:id}});
+    if(!data) return res.status(404).json({error:`${label} not found`});
+    let updatedData = {
+        name:req.body.name !=null?req.body.name.trim():data.name,
+        image:req.file!=null?`${req.protocol}://${req.get('host')}/${req.file.path}`:data.image,
+    }
+    await data.update(updatedData);
+    res.status(200).json(data);
+}
+
+// update category
+const updateCategory = async(req,res)=>{
+    try {
+        await update(req,res,Category,label='category');
+    } catch (error) {
+       res.status(500).json({error:error.message}); 
+    }
+}
+
+
+
+const updateSubCategory = async(req,res)=>{
+    try {
+        await update(req,res,SubCategory,label='category');
+    } catch (error) {
+       res.status(500).json({error:error.message}); 
+    }
+}
+
+const updateSubSubCategory = async(req,res)=>{
+    try {
+        await update(req,res,SubSubCategory,label='category');
+    } catch (error) {
+       res.status(500).json({error:error.message}); 
     }
 }
 
@@ -106,6 +148,9 @@ module.exports = {
     createSubCategory,
     createSubSubCategory,
     getCategories,
+    updateCategory,
+    updateSubCategory,
+    updateSubSubCategory
 };
 
 
