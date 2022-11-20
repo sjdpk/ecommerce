@@ -75,11 +75,11 @@ async function update(req,res,DbModel,label="id"){
     const id = req.params.id;
     const data = await DbModel.findOne({where:{id:id}});
     if(!data) return res.status(404).json({error:`${label} not found`});
-    let updatedData = {
+    data.set( {
         name:req.body.name !=null?req.body.name.trim():data.name,
         image:req.file!=null?`${req.protocol}://${req.get('host')}/${req.file.path}`:data.image,
-    }
-    await data.update(updatedData);
+    })
+    await data.save();
     res.status(200).json(data);
 }
 

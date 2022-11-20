@@ -45,6 +45,7 @@ module.exports = ( sequelize, DataTypes ) =>{
         },
         discountType : { 
             type :DataTypes.ENUM('fixed', 'percentage'),
+            values: ['fixed', 'percentage'],
             defaultValue :'fixed',
         },
         discount : { 
@@ -63,6 +64,9 @@ module.exports = ( sequelize, DataTypes ) =>{
             type : DataTypes.STRING,
             allowNull : false,
             validate:{notNull:{msg:"name cannot be empty"}}
+        },
+        additionalInfo :{
+            type :DataTypes.JSON,
         },
 
     });
