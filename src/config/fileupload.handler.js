@@ -5,11 +5,12 @@ const storage =  multer.diskStorage({
     destination : function(req,file,cb){
       const uploadDir ='./uploads';
       if (!fs.existsSync(uploadDir))fs.mkdirSync(uploadDir);
-      if(req.baseUrl.includes('category')){
+
+      if(req.originalUrl.includes('category')){
         const dir = './uploads/category';
         if (!fs.existsSync(dir))fs.mkdirSync(dir);
         cb(null,dir); 
-      }else if(req.baseUrl.includes('product')){
+      }else if(req.originalUrl.includes('product')){
         const dir = './uploads/product';
         if (!fs.existsSync(dir))fs.mkdirSync(dir);
         cb(null,dir); 
@@ -19,7 +20,7 @@ const storage =  multer.diskStorage({
     },
     filename : function(req,file,cb){
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-      const fileprefix = req.baseUrl.includes('category')?"category":req.baseUrl.includes('product')?'product':'image';
+      const fileprefix = req.originalUrl.includes('category')?"category":req.originalUrl.includes('product')?'product':'image';
       cb(null,fileprefix+"-"+uniqueSuffix+"-"+file.originalname)
     }
   });
