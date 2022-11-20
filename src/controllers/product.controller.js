@@ -39,6 +39,7 @@ const createProduct = async(req,res)=>{
             additionalInfo : !additionalInfo?null:JSON.parse(additionalInfo),
         }
         const product  = await ProductModel.create(productData);
+        product.deletedAt = undefined;
         res.status(201).json(product);
     } catch (error) {
        res.status(400).json({error:error.message}) 
@@ -46,16 +47,19 @@ const createProduct = async(req,res)=>{
 }
 
 const getProducts = async(req,res) =>{
-    const currentpage = parseInt(req.query.page);
+    const currentpage = req.query.page?parseInt(req.query.page):1;
     const offset = (parseInt(currentpage)-1)*PerPageLimit;
     try {
+        const condn = {deletedAt:null};
         const product = await ProductModel.findAll({
+            where:condn,
             limit: PerPageLimit,
-            offset :offset,
+            offset:offset,
+            attributes : { exclude : ['deletedAt']},
         });
-        const { totalPage,count } =await pagination(ProductModel,PerPageLimit);
+        const { totalPage,count } =await pagination(ProductModel,PerPageLimit, {where:condn});
         res.status(200).json({
-            currentpage :!currentpage?1:currentpage,
+            currentpage :currentpage,
             totalpage:totalPage,
             count:count,
             data:product,
@@ -68,7 +72,7 @@ const getProducts = async(req,res) =>{
 const getProduct = async(req,res)=>{
     const id = req.params.id;
     try {
-        const product = await ProductModel.findOne({where:{id:id}});
+        const product = await ProductModel.findOne({where:{id:id,deletedAt:null},attributes : { exclude : ['deletedAt']}});
         if(!product) return res.status(404).json({error:"product not found"});
         res.status(200).json(product);
     } catch (error){
@@ -78,7 +82,7 @@ const getProduct = async(req,res)=>{
 const updateProduct = async (req,res)=>{
     const id =  req.params.id;
     try {
-        const product = await ProductModel.findOne({where:{id:id}}); 
+        const product = await ProductModel.findOne({where:{id:id,deletedAt:null},attributes : { exclude : ['deletedAt']},}); 
         if(!product) return res.status(404).json({error:"product not found"});
 
         let categoryId = req.body.categoryId?req.body.categoryId:product.categoryId;

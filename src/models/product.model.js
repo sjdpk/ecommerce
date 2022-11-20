@@ -68,6 +68,8 @@ module.exports = ( sequelize, DataTypes ) =>{
         additionalInfo :{
             type :DataTypes.JSON,
         },
+        deletedAt:DataTypes.DATE,
+        // deletedBy :DataTypes.INTEGER,
 
     });
 
