@@ -48,9 +48,14 @@ const createProduct = async(req,res)=>{
 
 const getProducts = async(req,res) =>{
     const currentpage = req.query.page?parseInt(req.query.page):1;
+    const categoryId = req.query.categoryId;
+    const subcategoryId = req.query.subcategoryId;
+    const subsubcategoryId = req.query.subsubcategoryId;
+
     const offset = (parseInt(currentpage)-1)*PerPageLimit;
+    const condn = categoryId?{deletedAt:null,categoryId:categoryId}: subcategoryId?{deletedAt:null,subcategoryId:subcategoryId}: subsubcategoryId?{deletedAt:null,subsubcategoryId:subsubcategoryId}:{deletedAt:null};
     try {
-        const condn = {deletedAt:null};
+        // const condn = {deletedAt:null};
         const product = await ProductModel.findAll({
             where:condn,
             limit: PerPageLimit,
