@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const morgan = require('morgan');
 const categoryRoute = require('./routes/category.route');
 const productRoute = require('./routes/product.route');
+const departmentRoute = require('./routes/department.route');
 
 //load env variable
 dotenv.config({path:'./config/config.env'});
@@ -14,6 +15,7 @@ app.use(morgan('dev'));
 // routes handler
 app.use('/api/v1',categoryRoute);
 app.use('/api/v1',productRoute);
+app.use('/api/v1',departmentRoute);
 // app.use('/api/v1/sub-category',subCategoryRoute);
 
 const PORT = process.env.PORT || 4000;
