@@ -5,6 +5,7 @@ const categoryRoute = require('./routes/category.route');
 const productRoute = require('./routes/product.route');
 const departmentRoute = require('./routes/department.route');
 const couponRoute = require('./routes/coupon.route');
+const userRoute = require('./routes/user.route');
 
 //load env variable
 dotenv.config({path:'./config/config.env'});
@@ -18,6 +19,7 @@ app.use('/api/v1',categoryRoute);
 app.use('/api/v1',productRoute);
 app.use('/api/v1',departmentRoute);
 app.use('/api/v1',couponRoute);
+app.use('/api/v1',userRoute);
 // app.use('/api/v1/sub-category',subCategoryRoute);
 
 const PORT = process.env.PORT || 4000;
