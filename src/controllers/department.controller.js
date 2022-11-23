@@ -2,6 +2,7 @@ const db = require('../models');
 
 // create main models
 const DepartmentModel = db.department;
+const UserModel = db.user;
 
 
 // @desc : add new Department 
@@ -9,8 +10,9 @@ const DepartmentModel = db.department;
 // @access : Private [ Vendor, Admin ]
 // @Method : [ POST ]
 const createDepartment = async (req, res) => {
-    // TODO user exists or not
     try {
+        const user = await UserModel.findOne({where :{id:departmentHeadId}});
+        if(!user) return res.status(404).json({error:"user not found"});
         let departmentData = {
             departmentName: req.body.departmentName,
             departmentHeadId: req.body.departmentHeadId,

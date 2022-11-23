@@ -14,7 +14,7 @@ module.exports = (sequelize,Datatypes)=>{
             }
         },
         departmentHeadId:{
-            type : Datatypes.INTEGER,
+            type : Datatypes.UUID,
             allowNull : false,
             validate:{
                 notNull:{
