@@ -14,7 +14,6 @@ const DISCOUNTSTATUS = {
 // @access : Private [ Vendor, Admin ]
 // @Method : [ POST ]
 const createCoupon = async (req, res) => {
-    const discountType = req.body.discountType;
     const exists =  checkDiscountType(req);
     if(!exists) return res.status(400).json({error:"coupon type must be percentage or fixed"});
     try {
@@ -23,7 +22,7 @@ const createCoupon = async (req, res) => {
             startFrom: req.body.startFrom,
             endAt: req.body.endAt,
             visibility: req.body.visibility,
-            discountType: couponType,
+            discountType: req.body.discountType,
             discount: req.body.discount,
 
         };
