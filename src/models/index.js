@@ -146,6 +146,17 @@ Category.belongsToMany(Coupon, { through: 'coupon_category' });
  */
 User.hasOne(Cart);
 Cart.belongsTo(User);
+ /**
+  * User and Order Relationship
+  * user have one or many order
+  * one order belongs to one user
+  * relation [ one to many]
+  */
+ User.hasMany(Order,{
+    foreignKey: "userId",
+    as :"userorder",
+ });
+ Order.belongsTo(User);
 
 // sysncing database
 db.sequelize.sync({force:false}).then(()=>{
