@@ -138,6 +138,15 @@ Coupon.belongsToMany(Category, { through: 'coupon_category' });
 Category.belongsToMany(Coupon, { through: 'coupon_category' });
 
 
+/**
+ * Cart and user relationship
+ * one user have only one cart
+ * one cart belong to one person
+ * relation [ one to one ]
+ */
+User.hasOne(Cart);
+Cart.belongsTo(User);
+
 // sysncing database
 db.sequelize.sync({force:false}).then(()=>{
     console.log("re-sync done");
