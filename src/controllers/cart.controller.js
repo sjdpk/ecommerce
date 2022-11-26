@@ -15,6 +15,10 @@ const addToCart = async (req, res) => {
     if(!productIds) return res.status(400).json({error:"please add product"});
     if(productIds.length<=0) return res.status(400).json({error:"product cart can not be empty"});
     try {
+        for (let i = 0; i < productIds.length; i++) {
+            const product = await ProductModel.findOne({where:{id:productIds[i]}});
+            if(!product) return res.status(404).json({error:`product id of #${productIds[i]} not found`});  
+        }
         const user = await UserModel.findOne({where:{id:userId}});
         if(!user) return res.status(404).json({error:"user not found"});
         const cart = await CartModel.findOne({where:{userId:userId}});
