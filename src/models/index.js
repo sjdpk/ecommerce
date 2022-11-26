@@ -56,14 +56,12 @@ Banner = db.banner;
 */
 Category.hasMany(SubCategory,{
     foreignKey: 'categoryId',
-    as:'subcategory',
     allowNull: false,
   });
 SubCategory.belongsTo(Category);
 
 SubCategory.hasMany(SubSubCategory,{
     foreignKey: 'subcategoryId',
-    as:'subsubcategory',
     allowNull: false,
   });
 SubSubCategory.belongsTo(SubCategory);
@@ -77,20 +75,17 @@ SubSubCategory.belongsTo(SubCategory);
   * relation : [ product belongsTo Category ]
 */
 Category.hasMany(Product,{
-    foreignKey: 'categoryId',
-    as:'category',
+    foreignKey: 'categoryId'
 });
 Product.belongsTo(Category);
 
 SubCategory.hasMany(Product,{
-    foreignKey: 'subcategoryId',
-    as:'subcategory',
+    foreignKey: 'subcategoryId'
 });
 Product.belongsTo(SubCategory);
 
 SubSubCategory.hasMany(Product,{
-    foreignKey: 'subsubcategoryId',
-    as:'subsubcategory',
+    foreignKey: 'subsubcategoryId'
 });
 Product.belongsTo(SubSubCategory);
 
@@ -102,10 +97,9 @@ Product.belongsTo(SubSubCategory);
   * relation : [ product belongsTo Department ]
 */
 Department.hasMany(Product,{
-    foreignKey: 'departmentId',
-    as:'department',
+    foreignKey: 'departmentId'
 });
-Product.belongsTo(Department);
+Product.belongsTo(Department,{foreignKey: 'departmentId'});
 
 /* 
     *department and user relationship
@@ -115,10 +109,9 @@ Product.belongsTo(Department);
     *relation [department belongs to user]
 */
 User.hasMany(Department,{
-    foreignKey:'departmentHeadId',
-    as:'user',
+    foreignKey:'departmentHeadId'
 });
-Department.belongsTo(User);
+Department.belongsTo(User,{foreignKey:'departmentHeadId'});
 
 /*
     * product and coupon relationship

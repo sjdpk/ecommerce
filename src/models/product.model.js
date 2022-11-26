@@ -38,7 +38,6 @@ module.exports = ( sequelize, DataTypes ) =>{
                 }
             }  
         },
-        department : DataTypes.INTEGER,
         productStock :{
             type:DataTypes.INTEGER,
             defaultValue :1,
