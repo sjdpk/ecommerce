@@ -25,6 +25,7 @@ db.subcategory = require('./category.model')(sequelize,DataTypes,'subcategory');
 db.subSubcategory = require('./category.model')(sequelize,DataTypes,'subsubcategory');
 
 db.department = require('./department.model')(sequelize,DataTypes);
+db.banner = require('./banner.model')(sequelize,DataTypes);
 
 db.product = require('./product.model')(sequelize,DataTypes);
 db.cart = require('./cart.model')(sequelize,DataTypes);
@@ -44,6 +45,7 @@ Cart = db.cart;
 Coupon = db.coupon;
 Order = db.order;
 User = db.user;
+Banner = db.banner;
 
 
 /* 1.one category have many sub category but 
@@ -105,7 +107,6 @@ Department.hasMany(Product,{
 });
 Product.belongsTo(Department);
 
-
 /* 
     *department and user relationship
     *user has many department
@@ -157,6 +158,18 @@ Cart.belongsTo(User);
     as :"userorder",
  });
  Order.belongsTo(User);
+
+/**
+ * Banner Must contain category,productid,userId
+ * Banner may have one of the above
+ * Banner have One Category,ProductId,UserId
+ */
+Category.hasOne(Banner);
+Product.hasOne(Banner);
+User.hasOne(Banner);
+Banner.belongsTo(Category);
+Banner.belongsTo(Product);
+Banner.belongsTo(User);
 
 // sysncing database
 db.sequelize.sync({force:false}).then(()=>{
