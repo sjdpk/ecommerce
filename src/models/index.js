@@ -33,6 +33,7 @@ db.coupon = require('./coupon.model')(sequelize,DataTypes);
 db.order = require('./order.model')(sequelize,DataTypes);
 
 db.user = require('./user.model')(sequelize,DataTypes);
+db.application = require('./app.model')(sequelize,DataTypes);
 
 
 // Associations

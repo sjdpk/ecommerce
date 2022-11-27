@@ -18,13 +18,18 @@ const storage =  multer.diskStorage({
         const dir = './uploads/banner';
         if (!fs.existsSync(dir))fs.mkdirSync(dir);
         cb(null,dir); 
+      }
+      else if(req.originalUrl.includes('app')){
+        const dir = './uploads/application';
+        if (!fs.existsSync(dir))fs.mkdirSync(dir);
+        cb(null,dir); 
       }else{
         cb(null,uploadDir);
       }
     },
     filename : function(req,file,cb){
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-      const fileprefix = req.originalUrl.includes('category')?"category":req.originalUrl.includes('product')?'product':req.originalUrl.includes('banner')?'banner':'image';
+      const fileprefix = req.originalUrl.includes('category')?"category":req.originalUrl.includes('product')?'product':req.originalUrl.includes('banner')?'banner':req.originalUrl.includes('app')?'application':'image';
       cb(null,fileprefix+"-"+uniqueSuffix+"-"+file.originalname)
     }
   });
