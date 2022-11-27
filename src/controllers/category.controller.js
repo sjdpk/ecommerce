@@ -18,7 +18,7 @@ const createCategory = async(req,res)=>{
     if(req.file == null) return res.status(400).json({error:"select image"});
     let categoryData = {
         name:req.body.name.trim(),
-        image:`${req.protocol}://${req.get('host')}/${req.file.path}`,
+        image:req.file.path,
     }
     try {
         const category = await Category.create(categoryData);
@@ -35,7 +35,7 @@ const createCategory = async(req,res)=>{
 const createSubCategory = async(req,res)=>{
     const categoryId = req.body.categoryId;
     if(!categoryId) return res.status(400).json({error:"categoryId is required"});
-    const imagePath =req.file !=null?`${req.protocol}://${req.get('host')}/${req.file.path}`:null;
+    const imagePath =req.file !=null?req.file.path:null;
     let subCategoryData = {
         name:req.body.name,
         image:imagePath,
@@ -56,7 +56,7 @@ const createSubCategory = async(req,res)=>{
 const createSubSubCategory = async(req,res)=>{
     const subcategoryId = req.body.subcategoryId;
     if(!subcategoryId) return res.status(400).json({error:"subcategoryId is required"});
-    const imagePath =req.file !=null?`${req.protocol}://${req.get('host')}/${req.file.path}`:null;
+    const imagePath =req.file !=null?req.file.path:null;
     let subCategoryData = {
         name:req.body.name,
         image:imagePath,
@@ -77,7 +77,7 @@ async function update(req,res,DbModel,label="id"){
     if(!data) return res.status(404).json({error:`${label} not found`});
     data.set( {
         name:req.body.name !=null?req.body.name.trim():data.name,
-        image:req.file!=null?`${req.protocol}://${req.get('host')}/${req.file.path}`:data.image,
+        image:req.file!=null?req.file.path:data.image,
     })
     await data.save();
     res.status(200).json(data);

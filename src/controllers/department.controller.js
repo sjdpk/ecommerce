@@ -11,15 +11,19 @@ const UserModel = db.user;
 // @access : Private [ Vendor, Admin ]
 // @Method : [ POST ]
 const createDepartment = async (req, res) => {
-    const id = req.body.departmentHeadId;
-    const uuid = checkIfValidUUID(id);
+    const token = req.token;
+    const role = token.role;
+    if(role !=1) return res.status(401).json({error:"unauthorized"});
+    const departmentHeadId = token.userId;
+    const uuid = checkIfValidUUID(departmentHeadId);
     if (!uuid) return res.status(400).json({error:"invalid id"});
+
     try {
-        const user = await UserModel.findOne({where :{id:id}});
+        const user = await UserModel.findOne({where :{id:departmentHeadId}});
         if(!user) return res.status(404).json({error:"user not found"});
         let departmentData = {
             departmentName: req.body.departmentName,
-            departmentHeadId: req.body.departmentHeadId,
+            departmentHeadId: departmentHeadId,
         };
         const department = await DepartmentModel.create(departmentData);
         res.status(201).json(department);

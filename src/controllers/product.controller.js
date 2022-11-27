@@ -1,6 +1,7 @@
 const db = require("../models/index");
 const {isEmpty} = require('../config/common.config');
 const pagination = require('../config/pagination.handler');
+const {checkIfValidUUID} = require('../config/common.config');
 require('dotenv').config({path:"config/config.env"});
 const PerPageLimit  = process.env.PER_PAGE_LIMIT
 
@@ -11,8 +12,15 @@ SubSubCategoryModel = db.subSubcategory;
 DepartModel = db.department;
 
 const createProduct = async(req,res)=>{
+    const token = req.token;
+    const role = token.role;
+    if(role !=1) return res.status(401).json({error:"you have to access to add product"});
+    const vendorId = token.userId;
+    const uuid = checkIfValidUUID(vendorId);
+    if (!uuid) return res.status(400).json({error:"invalid id"});
+
     if(isEmpty(req)) return res.status(400).json({error:'please provide a valid body'});
-    if(!req.file) return res.status(400).json({error:"select product image"});
+    if(!req.file) return res.status(400).json({error:"select product image"});  
     let categoryId = req.body.categoryId;
     let subcategoryId = req.body.subcategoryId;
     let subsubcategoryId = req.body.subsubcategoryId;
@@ -41,7 +49,7 @@ const createProduct = async(req,res)=>{
             discountType:req.body.discountType,
             discount:req.body.discount,
             image:req.file.path,
-            vendorId : req.body.vendorId,
+            vendorId : vendorId,
             additionalInfo : !additionalInfo?null:JSON.parse(additionalInfo),
         }
         const product  = await ProductModel.create(productData);
@@ -103,31 +111,46 @@ const updateProduct = async (req,res)=>{
         const additionalInfo = req.body.additionalInfo;
 
         product.set( {
-        name :req.body.name?req.body.name:product.name,
-        description:req.body.description?req.body.description:product.description,
-        categoryId:category_Id,
-        subcategoryId:subcategory_Id,
-        subsubcategoryId : subsubcategory_Id,
-        price:req.body.price?req.body.price:product.price,
-        departmentId:req.body.departmentId?req.body.departmentId:product.departmentId,
-        productStock:req.body.productStock?req.body.productStock:product.productStock,
-        discountType:req.body.discountType?req.body.discountType:product.discountType,
-        discount:req.body.discount?req.body.discount:product.discount,
-        image:req.file.path?req.file.path:product.image,
-        additionalInfo : additionalInfo?JSON.parse(additionalInfo):product.additionalInfo,
-})
-    //    await ProductModel.update(productData);
-    await product.save();
-       res.status(200).json(product);
+            name :req.body.name?req.body.name:product.name,
+            description:req.body.description?req.body.description:product.description,
+            categoryId:category_Id,
+            subcategoryId:subcategory_Id,
+            subsubcategoryId : subsubcategory_Id,
+            price:req.body.price?req.body.price:product.price,
+            departmentId:req.body.departmentId?req.body.departmentId:product.departmentId,
+            productStock:req.body.productStock?req.body.productStock:product.productStock,
+            discountType:req.body.discountType?req.body.discountType:product.discountType,
+            discount:req.body.discount?req.body.discount:product.discount,
+            image:req.file.path?req.file.path:product.image,
+            additionalInfo : additionalInfo?JSON.parse(additionalInfo):product.additionalInfo,
+        });
+        await product.save();
+        res.status(200).json(product);
     } catch (error) {
        res.status(500).json({error:error.message}); 
     }
 }
+
+const deleteProduct = async(req,res)=>{
+    const id =  req.params.id;
+    try {
+        const product = await ProductModel.findOne({where:{id:id}});
+        if(!product) return res.status(404).json({error:"product not found"});
+        product.deletedAt = new Date();
+        await product.save();
+        res.status(204).json({msg:"product deleted"});
+
+    } catch (error) {
+        res.status(400).json({error:error.message});
+    }
+}
+
 module.exports = {
     createProduct,
     getProducts,
     getProduct,
     updateProduct,
+    deleteProduct,
 }
 
 async function categoryHandler(res,categoryId,subcategoryId,subsubcategoryId){

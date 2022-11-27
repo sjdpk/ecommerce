@@ -44,6 +44,15 @@ module.exports = (sequelize,DataTypes) =>{
             values: ['fixed', 'percentage'],
             defaultValue :'fixed',
         },
+        issuedBy:{
+            type : DataTypes.UUID,
+            allowNull : false,
+            validate:{
+                notNull:{
+                    msg:"user id cannot be empty"
+                }
+            }
+        },
         discount : { 
             type : DataTypes.DOUBLE,
             defaultValue :0.0,

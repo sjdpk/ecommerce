@@ -1,5 +1,8 @@
 const db = require('../models');
 const {checkIfValidUUID} = require('../config/common.config');
+require('dotenv').config({path:"config/config.env"});
+
+const VENDORID  = process.env.VENDOR_ID
 
 
 // create main models
@@ -16,7 +19,8 @@ const CategoryModel = db.category;
 const createBanner = async (req, res) => {
     if(req.file == null) return res.status(400).json({error:"select image"});
     const categoryId = req.body.categoryId;
-    const userId= req.body.userId;
+    
+    const userId = req.body.userId;
     const productId = req.body.productId;
 
     try {
@@ -27,7 +31,7 @@ const createBanner = async (req, res) => {
         if (userId) {
             const uuid = checkIfValidUUID(userId);
             if (!uuid) return res.status(400).json({error:"invalid user id"});
-            const user = await UserModel.findOne({where:{id:userId}});
+            const user = await UserModel.findOne({where:{id:userId,role:VENDORID}});
             if(!user) return res.status(404).json({error:"user not found"});
         }
         if (productId) {

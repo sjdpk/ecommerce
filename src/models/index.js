@@ -125,6 +125,13 @@ Department.belongsTo(User,{foreignKey:'departmentHeadId'});
     * one product have many coupon
     * relation [ Many-To-Many ]
 */
+
+User.hasMany(Coupon,{
+    foreignKey: 'issuedBy'
+});
+Coupon.belongsTo(User,{foreignKey: 'issuedBy'});
+
+
 Coupon.belongsToMany(Product, { through: 'coupon_product' });
 Product.belongsToMany(Coupon, { through: 'coupon_product' });
 

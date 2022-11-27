@@ -27,9 +27,14 @@ const UserModel = db.user;
 // @access : Private [ Normal user ]
 // @Method : [ POST ]
  const createOrder = async (req,res)=>{
-    let userId = req.body.userId;
+    // let userId = req.body.userId;
+    const token = req.token;
+    const role = token.role;
+    if(role !=1) return res.status(401).json({error:"unauthorized"});
+    const userId = token.userId;
     const uuid = checkIfValidUUID(userId);
     if (!uuid) return res.status(400).json({error:"invalid id"});
+
     let orderBody = req.body.order;
     if(orderBody.length<=0) return res.status(400).json({error:"order cannot be empty"});
     try {

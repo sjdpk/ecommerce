@@ -1,12 +1,18 @@
-
 const router = require('express').Router();
-const  {createDepartment,getDepartments,getDepartment,updateDepartment,deleteDepartment} =  require('../controllers/department.controller');
+const AuthMiddleware =require('../middlewares/auth.middleware');
+const  {
+    createDepartment,
+    getDepartments,
+    getDepartment,
+    updateDepartment,
+    deleteDepartment
+} =  require('../controllers/department.controller');
 
-router.post('/department',createDepartment);
+router.post('/department',AuthMiddleware.IsAuthenticated,createDepartment);
 router.get('/department',getDepartments);
 router.get('/department/:id',getDepartment);
-router.put('/department/:id',updateDepartment);
-router.delete('/department/:id',deleteDepartment);
+router.put('/department/:id',AuthMiddleware.IsAuthenticated,updateDepartment);
+router.delete('/department/:id',AuthMiddleware.IsAuthenticated,deleteDepartment);
 
 
 module.exports = router;

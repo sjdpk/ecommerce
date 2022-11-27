@@ -1,4 +1,5 @@
 const db = require('../models');
+const {checkIfValidUUID} = require('../config/common.config');
 // create main models
 const CartModel = db.cart;
 const UserModel = db.user;
@@ -10,8 +11,13 @@ const ProductModel  = db.product;
 // @access : Private [ user ]
 // @Method : [ POST ]
 const addToCart = async (req, res) => {
+    const token = req.token;
+    const role = token.role;
+    const userId = token.userId;
+    const uuid = checkIfValidUUID(userId);
+    if (!uuid) return res.status(400).json({error:"invalid id"});
+
     const productIds = req.body.products;
-    const userId = req.body.userId;
     if(!productIds) return res.status(400).json({error:"please add product"});
     if(productIds.length<=0) return res.status(400).json({error:"product cart can not be empty"});
     try {
@@ -62,7 +68,11 @@ const getCarts = async (req, res) => {
 // @access : public 
 // @Method : [ GET ]
 const getCart = async (req, res) => {
-    const userId = req.params.id;
+    const token = req.token;
+    const role = token.role;
+    const userId = token.userId;
+    const uuid = checkIfValidUUID(userId);
+    if (!uuid) return res.status(400).json({error:"invalid id"});
     try {
         const cart = await CartModel.findOne({where:{userId:userId}});
         if(!cart) return res.status(404).json({error:"cart not found"});
@@ -91,14 +101,18 @@ const getCart = async (req, res) => {
 // @access : Private [ User ]
 // @Method : [ PUT ]
 const removeFromCart = async (req, res) => {
+    const token = req.token;
+    const role = token.role;
+    const userId = token.userId;
+    const uuid = checkIfValidUUID(userId);
+    if (!uuid) return res.status(400).json({error:"invalid id"});
+
     const productIds = req.body.products;
-    const userId = req.body.userId;
     if(!productIds) return res.status(400).json({error:"please add product"});
     if(productIds.length<=0) return res.status(400).json({error:"product cart can not be empty"});
     try {
         const cart = await CartModel.findOne({where:{userId:userId}});
         if (!cart) return res.status(404).json({ error: "cart not found" });
-        // cart.products = cart.products.filter(item => !productIds.includes(item));
         for (let index = 0; index < productIds.length; index++) {
             const removeId =  cart.products.indexOf(productIds[index])
             if(removeId>-1){
@@ -113,9 +127,6 @@ const removeFromCart = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
-
-
-
 
 
 module.exports = {
