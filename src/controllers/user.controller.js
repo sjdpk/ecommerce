@@ -10,7 +10,9 @@ const UserModel  = db.user;
 const PerPageLimit  = parseInt(process.env.PER_PAGE_LIMIT);
 JWT_EXPIRYDATE = process.env.JWT_EXPIRYDATE;
 const JWT_SECRET_KEY  =  process.env.JWT_SECRET_KEY;
-
+const ADMINID = parseInt(process.env.ADMIN_ID);
+const VENDORID = parseInt(process.env.VENDOR_ID);
+const USERID = parseInt(process.env.NORMAL_USER_ID);
 
 // @desc  : create new user 
 // @route : /api/v1/user/
@@ -32,7 +34,7 @@ const createUser = async(req,res)=>{
             address : req.body.address.trim(),
             password :password,
             role : role?role:1,
-            active : req.body.active,
+            active : role === VENDORID?false: true,
             // disable : req.body.disable,
         };
         const user = await UserModel.create(userInfo);
