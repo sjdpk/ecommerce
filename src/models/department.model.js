@@ -1,7 +1,7 @@
-module.exports = (sequelize,Datatypes)=>{
+module.exports = (sequelize,DataTypes)=>{
     const Department = sequelize.define("department",{
         departmentName:{
-            type : Datatypes.STRING,
+            type : DataTypes.STRING,
             allowNull : false,
             unique :  {
                 args: true,
@@ -14,7 +14,7 @@ module.exports = (sequelize,Datatypes)=>{
             }
         },
         departmentHeadId:{
-            type : Datatypes.UUID,
+            type : DataTypes.UUID,
             allowNull : false,
             validate:{
                 notNull:{

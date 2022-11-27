@@ -41,6 +41,7 @@ const createProduct = async(req,res)=>{
             discountType:req.body.discountType,
             discount:req.body.discount,
             image:req.file.path,
+            vendorId : req.body.vendorId,
             additionalInfo : !additionalInfo?null:JSON.parse(additionalInfo),
         }
         const product  = await ProductModel.create(productData);

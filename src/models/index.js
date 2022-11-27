@@ -102,6 +102,11 @@ Department.hasMany(Product,{
 });
 Product.belongsTo(Department,{foreignKey: 'departmentId'});
 
+User.hasMany(Product,{
+    foreignKey: 'vendorId'
+});
+Product.belongsTo(User,{foreignKey: 'vendorId'});
+
 /* 
     *department and user relationship
     *user has many department

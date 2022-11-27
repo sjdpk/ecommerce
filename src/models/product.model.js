@@ -67,6 +67,15 @@ module.exports = ( sequelize, DataTypes ) =>{
         additionalInfo :{
             type :DataTypes.JSON,
         },
+        vendorId:{
+            type : DataTypes.UUID,
+            allowNull : false,
+            validate:{
+                notNull:{
+                    msg:"vendor id cannot be empty"
+                }
+            }
+        },
         deletedAt:DataTypes.DATE,
         // deletedBy :DataTypes.INTEGER,
 
