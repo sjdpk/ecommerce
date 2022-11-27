@@ -8,6 +8,7 @@ ProductModel = db.product;
 CategoryModel = db.category;
 SubCategoryModel = db.subcategory;
 SubSubCategoryModel = db.subSubcategory;
+DepartModel = db.department;
 
 const createProduct = async(req,res)=>{
     if(isEmpty(req)) return res.status(400).json({error:'please provide a valid body'});
@@ -15,6 +16,8 @@ const createProduct = async(req,res)=>{
     let categoryId = req.body.categoryId;
     let subcategoryId = req.body.subcategoryId;
     let subsubcategoryId = req.body.subsubcategoryId;
+    let departmentId = req.body.departmentId;
+    if(!departmentId) return res.status(400).json({error:"departmentId is required"});
 
     if(!categoryId) categoryId = null;
      if(!subcategoryId) subcategoryId = null;
@@ -22,6 +25,8 @@ const createProduct = async(req,res)=>{
     if(categoryId === null &&subcategoryId === null && subsubcategoryId === null) return res.status(400).json({error:"please select category"});
 
     try {
+        const department = await DepartModel.findOne({where:{id:departmentId}});
+        if(!department) return res.status(404).json({error:"department not found"});
         const {category_Id,subcategory_Id,subsubcategory_Id} = await categoryHandler(res,categoryId,subcategoryId,subsubcategoryId);
         const additionalInfo = req.body.additionalInfo;
         let productData = {
