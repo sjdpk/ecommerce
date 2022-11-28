@@ -2,7 +2,11 @@ const db = require("../models/index");
 const {isEmpty} = require('../config/common.config');
 const pagination = require('../config/pagination.handler');
 const {checkIfValidUUID} = require('../config/common.config');
+const sequelize = db.Sequelize;
 require('dotenv').config({path:"config/config.env"});
+
+
+
 const PerPageLimit  = process.env.PER_PAGE_LIMIT
 
 ProductModel = db.product;
@@ -65,13 +69,25 @@ const getProducts = async(req,res) =>{
     const categoryId = req.query.categoryId;
     const subcategoryId = req.query.subcategoryId;
     const subsubcategoryId = req.query.subsubcategoryId;
-
+    const search = req.query.search;
     const offset = (parseInt(currentpage)-1)*PerPageLimit;
-    const condn = categoryId?{deletedAt:null,categoryId:categoryId}: subcategoryId?{deletedAt:null,subcategoryId:subcategoryId}: subsubcategoryId?{deletedAt:null,subsubcategoryId:subsubcategoryId}:{deletedAt:null};
+    const condn =search?{
+        name: sequelize.where(sequelize.fn('LOWER', sequelize.col('name')), 'LIKE', '%' + search.toLowerCase() + '%')
+    }
+    : categoryId?{
+        deletedAt:null,categoryId:categoryId
+    }: subcategoryId?{
+        deletedAt:null,subcategoryId:subcategoryId
+    }: subsubcategoryId?{
+        deletedAt:null,subsubcategoryId:subsubcategoryId
+    }:{
+        deletedAt:null
+    };
     try {
         // const condn = {deletedAt:null};
         const product = await ProductModel.findAll({
             where:condn,
+            // where: ,
             limit: PerPageLimit,
             offset:offset,
             attributes : { exclude : ['deletedAt']},
