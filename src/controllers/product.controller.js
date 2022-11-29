@@ -3,6 +3,7 @@ const {isEmpty} = require('../config/common.config');
 const pagination = require('../config/pagination.handler');
 const {checkIfValidUUID} = require('../config/common.config');
 const sequelize = db.Sequelize;
+const { Op } = db.Sequelize;
 require('dotenv').config({path:"config/config.env"});
 
 
@@ -70,24 +71,46 @@ const getProducts = async(req,res) =>{
     const subcategoryId = req.query.subcategoryId;
     const subsubcategoryId = req.query.subsubcategoryId;
     const search = req.query.search;
+    const vendorId = req.query.vendorId;
+    const departmentId = req.query.departmentId;
+    const priceFrom = req.query.priceFrom;
+    const priceTo = req.query.priceTo;
+    const priceOrder = req.query.priceOrder;
+    const nameOrder = req.query.nameOrder;
     const offset = (parseInt(currentpage)-1)*PerPageLimit;
-    const condn =search?{
-        name: sequelize.where(sequelize.fn('LOWER', sequelize.col('name')), 'LIKE', '%' + search.toLowerCase() + '%')
-    }
-    : categoryId?{
-        deletedAt:null,categoryId:categoryId
-    }: subcategoryId?{
-        deletedAt:null,subcategoryId:subcategoryId
-    }: subsubcategoryId?{
-        deletedAt:null,subsubcategoryId:subsubcategoryId
-    }:{
-        deletedAt:null
+    let condn = { deletedAt:null };
+    let order = [];
+    if(vendorId) condn = { deletedAt:null,vendorId:vendorId };
+    if(departmentId) condn = { deletedAt:null,departmentId:departmentId };
+    if (search) condn = { deletedAt:null,name: sequelize.where(sequelize.fn('LOWER', sequelize.col('name')), 'LIKE', '%' + search.toLowerCase() + '%')};
+    if(priceFrom&&priceTo) condn = {deletedAt:null, "price": {[Op.and]: {[Op.gte]: priceFrom,[Op.lte]: priceTo}}};
+    if(priceFrom) condn = {deletedAt:null, "price": {[Op.and]: {[Op.gte]: priceFrom}}};
+    if(priceTo) condn = {deletedAt:null, "price": {[Op.and]: {[Op.lte]: priceTo}}};
+    if(categoryId)  condn = {deletedAt:null,categoryId:categoryId};
+    if(subcategoryId) condn = {deletedAt:null,subcategoryId:subcategoryId};
+    if(subsubcategoryId) condn = { deletedAt:null,subsubcategoryId:subsubcategoryId};
+    if(priceOrder==='asc')  order = [['price', 'ASC']];
+    if(priceOrder==='desc')  order = [['price', 'DESC']];
+    if(nameOrder==='asc')  order = [['name', 'ASC']];
+    if(nameOrder==='desc')  order = [['name', 'DESC']];
+    if(search && priceFrom && priceTo) condn = { 
+        deletedAt:null,name: sequelize.where(sequelize.fn('LOWER', sequelize.col('name')), 'LIKE', '%' + search.toLowerCase() + '%'),
+        "price": {[Op.and]: {[Op.gte]: priceFrom,[Op.lte]: priceTo}}
     };
+    if(search && priceFrom) condn = { 
+        deletedAt:null,name: sequelize.where(sequelize.fn('LOWER', sequelize.col('name')), 'LIKE', '%' + search.toLowerCase() + '%'),
+        "price": {[Op.and]: {[Op.gte]: priceFrom}}
+    };
+    if(search && priceTo) condn = { 
+        deletedAt:null,name: sequelize.where(sequelize.fn('LOWER', sequelize.col('name')), 'LIKE', '%' + search.toLowerCase() + '%'),
+        "price": {[Op.and]: {[Op.lte]: priceTo}}
+    };
+    
     try {
         // const condn = {deletedAt:null};
         const product = await ProductModel.findAll({
             where:condn,
-            // where: ,
+            order:order,
             limit: PerPageLimit,
             offset:offset,
             attributes : { exclude : ['deletedAt']},
