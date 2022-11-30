@@ -16,6 +16,10 @@ SubCategoryModel = db.subcategory;
 SubSubCategoryModel = db.subSubcategory;
 DepartModel = db.department;
 
+// @desc : add new product 
+// @route : /api/v1/product
+// @access : Private [ Vendor, Admin ]
+// @Method : [ POST ]
 const createProduct = async(req,res)=>{
     const token = req.token;
     const role = token.role;
@@ -65,6 +69,10 @@ const createProduct = async(req,res)=>{
     }
 }
 
+// @desc : get visible product list 
+// @route : /api/v1/product
+// @access : Public
+// @Method : [ GET ]
 const getProducts = async(req,res) =>{
     const currentpage = req.query.page?parseInt(req.query.page):1;
     const categoryId = req.query.categoryId;
@@ -127,6 +135,10 @@ const getProducts = async(req,res) =>{
     }
 }
 
+// @desc : get single visible product 
+// @route : /api/v1/product:id
+// @access : Public
+// @Method : [ GET ]
 const getProduct = async(req,res)=>{
     const id = req.params.id;
     try {
@@ -137,6 +149,11 @@ const getProduct = async(req,res)=>{
         res.status(500).json({error :error.message})
     }
 } 
+
+// @desc : Update single visible product Form Data
+// @route : /api/v1/product:id
+// @access : Private
+// @Method : [ PUT ]
 const updateProduct = async (req,res)=>{
     const id =  req.params.id;
     try {
@@ -170,6 +187,10 @@ const updateProduct = async (req,res)=>{
     }
 }
 
+// @desc : Deete product 
+// @route : /api/v1/product//:id
+// @access : Private [ Vendor,Admin ]
+// @Method : [ DELETE ]
 const deleteProduct = async(req,res)=>{
     const id =  req.params.id;
     try {
@@ -184,13 +205,6 @@ const deleteProduct = async(req,res)=>{
     }
 }
 
-module.exports = {
-    createProduct,
-    getProducts,
-    getProduct,
-    updateProduct,
-    deleteProduct,
-}
 
 async function categoryHandler(res,categoryId,subcategoryId,subsubcategoryId){
     const category = await CategoryModel.findOne({where:{id:categoryId}});
@@ -219,3 +233,12 @@ async function categoryHandler(res,categoryId,subcategoryId,subsubcategoryId){
         subsubcategory_Id : subsubcategoryId,
     }
 }
+
+module.exports = {
+    createProduct,
+    getProducts,
+    getProduct,
+    updateProduct,
+    deleteProduct,
+}
+
