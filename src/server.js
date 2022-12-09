@@ -10,6 +10,8 @@ const cartRoute = require('./routes/cart.route');
 const orderRoute = require('./routes/order.route');
 const BannerRoute = require('./routes/banner.route');
 const AppRoute = require('./routes/app.route');
+const DashboardRoute = require('./routes/dashboard.route');
+
 
 //load env variable
 dotenv.config({path:'./config/config.env'});
@@ -28,6 +30,7 @@ app.use('/api/v1',cartRoute);
 app.use('/api/v1',orderRoute);
 app.use('/api/v1',BannerRoute);
 app.use('/api/v1',AppRoute);
+app.use('/api/v1',DashboardRoute);
 // app.use('/api/v1/sub-category',subCategoryRoute);
 
 const PORT = process.env.PORT || 4000;
