@@ -114,11 +114,14 @@ const updateSubSubCategory = async(req,res)=>{
 // @route : /api/v1/category
 // @access : Public 
 // @Method : [ Get ]
-async function fetch(res,DbModel,condn={}){
-    const { count, rows } = await DbModel.findAndCountAll({
+async function fetch(req,res,DbModel,condn={}){
+    let { count, rows } = await DbModel.findAndCountAll({
         where: condn,
         attributes : { exclude : ['createdAt','updatedAt']},
       });
+      rows.forEach(element=>{
+        element.image =`${req.protocol}://${req.get('host')}/${element.image}`
+    });
       res.status(200).json({count:count,data:rows});
 }
 
@@ -128,13 +131,13 @@ const getCategories = async(req,res)=>{
         const subcategoryId =  req.query.subcategoryId;
         if (categoryId) {
             const condn = { visibility:true,categoryId:categoryId };
-          return  await fetch(res,SubCategory,condn);
+          return  await fetch(req,res,SubCategory,condn);
         }
         if(subcategoryId){
             const condn = { visibility:true,subcategoryId:subcategoryId };
-          return  await fetch(res,SubSubCategory,condn);
+          return  await fetch(req,res,SubSubCategory,condn);
         }
-        await fetch(res,Category,{visibility:true});
+        await fetch(req,res,Category,{visibility:true});
     } catch (error) {
         res.status(500).json({"error":error.message});
     }

@@ -2,7 +2,7 @@ const router = require('express').Router();
 const UserController = require('../controllers/user.controller');
 const AuthMiddleware =require('../middlewares/auth.middleware');
 
-router.post('/user',UserController.createUser);
+router.post('/register',UserController.createUser);
 router.post('/login',UserController.loginUser);
 router.get('/me',AuthMiddleware.IsAuthenticated,UserController.me);
 

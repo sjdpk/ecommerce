@@ -142,9 +142,45 @@ const getProducts = async(req,res) =>{
 const getProduct = async(req,res)=>{
     const id = req.params.id;
     try {
-        const product = await ProductModel.findOne({where:{id:id,deletedAt:null},attributes : { exclude : ['deletedAt']}});
+        const product = await ProductModel.findOne({
+            where:{id:id,deletedAt:null},
+            attributes : { exclude : ['deletedAt']},
+            include :[
+                {model: db.user,attributes : ["first_name","last_name"]},
+                {model: db.category,attributes : ["name"]},
+                {model: db.subcategory,attributes : ["name"]},
+                {model: db.subSubcategory,attributes : ["name"]},
+                {model: db.department,attributes : ["departmentName"]},
+            ],
+        });
         if(!product) return res.status(404).json({error:"product not found"});
-        res.status(200).json(product);
+        
+        const productResponse  ={
+            "id": product.id,
+            "name": product.name,
+            "slug":product.slug,
+            "description": product.description,
+            "price": product.price,
+            "productStock": product.productStock,
+            "discountType": product.discountType,
+            "discount": product.discount,
+            "visibility": product.visibility,
+            "image": `${req.protocol}://${req.get('host')}/${product.image}`,
+            "additionalInfo": product.additionalInfo,
+            "vendorId":product.vendorId,
+            "vendorName":product.user.first_name +" "+ product.user.last_name,
+            "createdAt": product.createdAt,
+            "updatedAt":product.updatedAt,
+            "categoryId": product.categoryId,
+            "categoryName": product.category.name,
+            "subcategoryId": product.subcategoryId,
+            "subcategoryName": product.subcategory !=null ?product.subcategory.name:null,
+            "subsubcategoryId": product.subsubcategoryId,
+            "subsubcategoryName":product.subsubcategory !=null? product.subsubcategory.name:null,
+            "departmentId": product.departmentId,
+            "departmentName": product.department.departmentName,  
+        }
+        res.status(200).json(productResponse);
     } catch (error){
         res.status(500).json({error :error.message})
     }

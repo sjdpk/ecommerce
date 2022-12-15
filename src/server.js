@@ -17,7 +17,7 @@ const DashboardRoute = require('./routes/dashboard.route');
 dotenv.config({path:'./config/config.env'});
 const app = express();
 app.use(express.json());
-app.use('/uploads',express.static('uploads'));
+app.use('/uploads/', express.static('uploads'));
 app.use(morgan('dev'));
 
 // routes handler

@@ -13,7 +13,7 @@ const createApp = async (req, res) => {
     if(!logo) return res.status(400).json({error:"logo is required"});
     try {
         let appData = {
-            appname: req.body.appname,
+            appname: dash,
             logo: req.file.path,
             email: req.body.email,
             phoneNumber: req.body.phoneNumber,
