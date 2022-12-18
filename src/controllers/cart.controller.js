@@ -1,5 +1,9 @@
 const db = require('../models');
 const {checkIfValidUUID} = require('../config/common.config');
+require('dotenv').config({path : "config/config.env"});
+const ADMINID = parseInt(process.env.ADMIN_ID);
+const VENDORID = parseInt(process.env.VENDOR_ID);
+const USERID = parseInt(process.env.NORMAL_USER_ID);
 // create main models
 const CartModel = db.cart;
 const UserModel = db.user;
@@ -17,49 +21,49 @@ const addToCart = async (req, res) => {
     const uuid = checkIfValidUUID(userId);
     if (!uuid) return res.status(400).json({error:"invalid id"});
 
-    const productIds = req.body.products;
-    if(!productIds) return res.status(400).json({error:"please add product"});
-    if(productIds.length<=0) return res.status(400).json({error:"product cart can not be empty"});
+    const productId = req.body.productId;
+    const quantity = req.body.quantity?req.body.quantity:1;
+    const additionalInfo = req.body.additionalInfo;
+    const remark = req.body.remark;
+    // if(!productIds) return res.status(400).json({error:"please add product"});
+    if(!productId) return res.status(400).json({error:"product cart can not be empty"});
     try {
-        for (let i = 0; i < productIds.length; i++) {
-            const product = await ProductModel.findOne({where:{id:productIds[i]}});
-            if(!product) return res.status(404).json({error:`product id of #${productIds[i]} not found`});  
-        }
+        const product = await ProductModel.findOne({where:{id:productId}});
+        if(!product) return res.status(404).json({error:`${productId} not found`});  
+
         const user = await UserModel.findOne({where:{id:userId}});
         if(!user) return res.status(404).json({error:"user not found"});
-        const cart = await CartModel.findOne({where:{userId:userId}});
+        
+        const cart = await CartModel.findOne({where:{userId:userId,productId : productId,additionalInfo:additionalInfo}});
         if(!cart){
+        if(quantity<0) return res.status(400).json({error:"quantity cannot be negative"});
             let cartData = {
                 userId :userId,
-                products : productIds,
+                productId : productId,
+                quantity:quantity,
+                additionalInfo:additionalInfo,
+                remark:remark,
             };
             const cart = await CartModel.create(cartData);
+            cart.deleted = undefined;
             return res.status(201).json(cart);
+        }else{
+            cart.quantity = parseInt(cart.quantity) + parseInt(quantity);
+            cart.additionalInfo = additionalInfo,
+            cart.remark = remark,
+            cart.deleted = undefined;
+            if(cart.quantity>0) cart.deleted = false;
+            if(cart.quantity<=0){
+                cart.deleted = true;
+                cart.quantity = 0;
+                await cart.save();
+                return res.status(204).json({msg:"cart removed"});
+            }
+            await cart.save();
+            return res.status(200).json(cart);
         }
-        cart.products = [
-            ...cart.products,
-            ...productIds
-        ];
-        await cart.save();
-        res.status(200).json(cart);
     } catch (error) {
         res.status(500).json({ error: error.message });
-    }
-}
-
-// @desc : get cart list 
-// @route : /api/v1/cart
-// @access : Provate  [ADMIN]
-// @Method : [ GET ]
-const getCarts = async (req, res) => {
-    try {
-        const {count,rows} = await CartModel.findAndCountAll({});
-        res.status(200).json({
-            count: count,
-            data: rows
-        });
-    } catch (error) {
-        res.status(500).send({ error: error.message });
     }
 }
 
@@ -69,72 +73,39 @@ const getCarts = async (req, res) => {
 // @Method : [ GET ]
 const getCart = async (req, res) => {
     const token = req.token;
-    const role = token.role;
+    const role = parseInt(token.role);
     const userId = token.userId;
     const uuid = checkIfValidUUID(userId);
     if (!uuid) return res.status(400).json({error:"invalid id"});
-    try {
-        const cart = await CartModel.findOne({where:{userId:userId}});
-        if(!cart) return res.status(404).json({error:"cart not found"});
-        var newCart =[];
-        var count = {};
-        cart.products.forEach(function(i) { 
-            count[i] = (count[i]||0) + 1;
-        });
-        for (const [key, value] of Object.entries(count)) {
-            newCart.push({
-                "productId":parseInt(key),
-                "quantity":value
+        try {
+            // @desc : admin 
+           if(role === ADMINID){
+            const {count,rows} = await CartModel.findAndCountAll({where:{deleted:false},attributes:{ exclude: ['deleted'] }});
+            res.status(200).json({
+                count: count,
+                data: rows
             });
+           }
+            // @desc : Normal user 
+           else if(role === USERID){
+            const {count,rows} = await CartModel.findAndCountAll({where:{userId:userId,deleted:false},attributes:{ exclude: ['deleted'] }});
+            res.status(200).json({
+                count: count,
+                data: rows
+            });
+           }
+           else{
+            res.status(401).send({ error: "un-authorized" });
+           }
+        } catch (error) {
+            res.status(400).send({ error: error.message });
         }
-        res.status(200).json({
-            total: new Set(cart.products).size,
-            data: newCart
-        });
-    } catch (error) {
-        res.status(500).send({ error: error.message });
-    }
-}
 
-// @desc : Delete cart 
-// @route : /api/v1/cart/:id
-// @access : Private [ User ]
-// @Method : [ PUT ]
-const removeFromCart = async (req, res) => {
-    const token = req.token;
-    const role = token.role;
-    const userId = token.userId;
-    const uuid = checkIfValidUUID(userId);
-    if (!uuid) return res.status(400).json({error:"invalid id"});
-
-    const productIds = req.body.products;
-    if(!productIds) return res.status(400).json({error:"please add product"});
-    if(productIds.length<=0) return res.status(400).json({error:"product cart can not be empty"});
-    try {
-        const cart = await CartModel.findOne({where:{userId:userId}});
-        if (!cart) return res.status(404).json({ error: "cart not found" });
-        for (let index = 0; index < productIds.length; index++) {
-            const removeId =  cart.products.indexOf(productIds[index])
-            if(removeId>-1){
-                cart.products.splice(removeId,1);
-            }
-        }
-        cart.products = cart.products;
-    
-        await CartModel.update({products :cart.products},{where:{userId:userId}});
-        res.status(200).json(cart);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+   
 }
 
 
 module.exports = {
     addToCart,
-    getCarts,
-    getCart,
-    removeFromCart,
-    // getDepartment,
-    // updateDepartment,
-    // deleteDepartment,
+    getCart
 };

@@ -116,19 +116,41 @@ const getProducts = async(req,res) =>{
     
     try {
         // const condn = {deletedAt:null};
-        const product = await ProductModel.findAll({
+        // const product = await ProductModel.findAll({
+        //     where:condn,
+        //     order:order,
+        //     limit: PerPageLimit,
+        //     offset:offset,
+        //     attributes : { exclude : ['deletedAt']},
+        // });
+        const product  = await ProductModel.findAll({
             where:condn,
-            order:order,
-            limit: PerPageLimit,
-            offset:offset,
-            attributes : { exclude : ['deletedAt']},
+            order:order, 
+            limit: PerPageLimit, 
+            attributes :['id','name','slug','price','discountType','discount','image','vendorId'],
+            include :[{model: db.user,attributes : ["first_name","last_name"]}]
         });
         const { totalPage,count } =await pagination(ProductModel,PerPageLimit, {where:condn});
+        let productJson = [];
+        product.forEach(async(element)  => {
+            productJson.push({
+                "id":element.id,
+                'name':element.name,
+                'slug':element.slug,
+                'price':element.price,
+                'discountType':element.discountType,
+                'discount':element.discount,
+                'image':`${req.protocol}://${req.get('host')}/${element.image}`,
+                'vendorId':element.vendorId,
+                'vendorname': element.user.first_name+" "+element.user.last_name,
+                'vedorimage':null,
+            });
+        });
         res.status(200).json({
             currentpage :currentpage,
             totalpage:totalPage,
             count:count,
-            data:product,
+            data:productJson,
         });
     } catch (error) {
         res.status(500).json({error:error.message});
