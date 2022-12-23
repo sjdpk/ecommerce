@@ -115,14 +115,6 @@ const getProducts = async(req,res) =>{
     };
     
     try {
-        // const condn = {deletedAt:null};
-        // const product = await ProductModel.findAll({
-        //     where:condn,
-        //     order:order,
-        //     limit: PerPageLimit,
-        //     offset:offset,
-        //     attributes : { exclude : ['deletedAt']},
-        // });
         const product  = await ProductModel.findAll({
             where:condn,
             order:order, 
@@ -206,7 +198,28 @@ const getProduct = async(req,res)=>{
     } catch (error){
         res.status(500).json({error :error.message})
     }
-} 
+}
+
+
+// @desc : get search list product  for autosugession
+// @route : /api/v1/product/all
+// @access : Public
+// @Method : [ GET ]
+
+const getAutoSugessionList = async (req,res)=>{
+    try {
+        const product = await ProductModel.findAll({
+            where:{deletedAt:null},
+            order: db.sequelize.random(), 
+            limit: 644, 
+            attributes : ["id","name"]
+        })
+        res.status(200).json({data:product}); 
+    } catch (error) {
+       res.status(400).json({error:error.message}); 
+        
+    }
+}
 
 // @desc : Update single visible product Form Data
 // @route : /api/v1/product:id
@@ -241,7 +254,7 @@ const updateProduct = async (req,res)=>{
         await product.save();
         res.status(200).json(product);
     } catch (error) {
-       res.status(500).json({error:error.message}); 
+       res.status(400).json({error:error.message}); 
     }
 }
 
@@ -296,6 +309,7 @@ module.exports = {
     createProduct,
     getProducts,
     getProduct,
+    getAutoSugessionList,
     updateProduct,
     deleteProduct,
 }

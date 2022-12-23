@@ -120,7 +120,7 @@ async function fetch(req,res,DbModel,condn={}){
         attributes : { exclude : ['createdAt','updatedAt']},
       });
       rows.forEach(element=>{
-        element.image =`${req.protocol}://${req.get('host')}/${element.image}`
+        element.image =element.image? `${req.protocol}://${req.get('host')}/${element.image}`:element.image
     });
       res.status(200).json({count:count,data:rows});
 }
@@ -131,7 +131,7 @@ const getCategories = async(req,res)=>{
         const subcategoryId =  req.query.subcategoryId;
         if (categoryId) {
             const condn = { visibility:true,categoryId:categoryId };
-          return  await fetch(req,res,SubCategory,condn);
+            return  await fetch(req,res,SubCategory,condn);
         }
         if(subcategoryId){
             const condn = { visibility:true,subcategoryId:subcategoryId };
