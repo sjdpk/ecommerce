@@ -28,6 +28,9 @@ module.exports = (sequelize,DataTypes)=>{
             defaultValue: 'ordered',
         },
         remark : DataTypes.STRING,
+        userName: DataTypes.STRING,
+        email: DataTypes.STRING,
+        phone: DataTypes.STRING,
         userId : {
             type : DataTypes.UUID,
             allowNull:false,

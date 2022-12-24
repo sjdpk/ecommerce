@@ -100,12 +100,32 @@ const getCart = async (req, res) => {
         } catch (error) {
             res.status(400).send({ error: error.message });
         }
-
-   
 }
 
+const removeFromCart = async(req,res)=>{
+    const orderedCartItemList = req.body.orderedCartItemList;
+        try {
+            for (let index = 0; index < orderedCartItemList.length; index++) {
+                const cart = await CartModel.findOne({
+                    where:{
+                        productId:orderedCartItemList[index],
+                        deleted:false,
+                    }
+                });
+                if(cart){
+                    cart.deleted = true;
+                    cart.quantity = 0;
+                    await cart.save();
+                }   
+            }
+            return res.status(200).json({msg:"cart removed"}); 
+        } catch (error) {
+            res.status(400).json({error:error.message});
+        }
+    }
 
 module.exports = {
     addToCart,
-    getCart
+    getCart,
+    removeFromCart,
 };

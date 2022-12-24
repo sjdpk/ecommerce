@@ -21,6 +21,7 @@ const OrderStatus = {
 const OrderModel = db.order;
 const ProductModel = db.product;
 const UserModel = db.user;
+const CartModel = db.cart;
 
 // @desc : Simple  one product order
 // @route : /api/v1/order/productId
@@ -30,34 +31,48 @@ const UserModel = db.user;
     // let userId = req.body.userId;
     const token = req.token;
     const role = token.role;
-    if(role !=1) return res.status(401).json({error:"unauthorized"});
+    if(role != 2) return res.status(401).json({error:"unauthorized"});
     const userId = token.userId;
     const uuid = checkIfValidUUID(userId);
     if (!uuid) return res.status(400).json({error:"invalid id"});
 
     let orderBody = req.body.order;
+    let productIds = [];
     if(orderBody.length<=0) return res.status(400).json({error:"order cannot be empty"});
     try {
         for (let i = 0; i < orderBody.length; i++) {
             const pid = !orderBody[i].hasOwnProperty('productId');
             const qty = !orderBody[i].hasOwnProperty('quantity');
             const price = !orderBody[i].hasOwnProperty('price');
+            const additionalInfo = !orderBody[i].hasOwnProperty('additionalInfo');
             if(pid) return res.status(400).json({error:`order object ${i+1} must contain productId`}); 
             const product = await ProductModel.findOne({where:{id:orderBody[i].productId}});
             if(!product)  return res.status(404).json({error:`object ${i+1} product not found`});
+            productIds.push(orderBody[i]["productId"]);
             if(price) return res.status(400).json({error:`order object ${i+1} must contain price`}); 
             if(qty) orderBody[i]['quantity'] = 1; 
         }
+        console.log(productIds);
         // @desc : wheather user is present or not
         const user = await UserModel.findOne({where:{id:userId}});
         if(!user) return res.status(404).json({error:"user not found"});
         const orderData = {
             order : req.body.order,
+            userName:req.body.userName,
+            email:req.body.email,
+            phone:req.body.phone,
             deliveryAddress : req.body.deliveryAddress,
             orderStatus : req.body.orderStatus,
             userId : userId,
         }
         const order = await OrderModel.create(orderData);
+
+        // @desc : remove product from cart after product is ordered
+        for (let index = 0; index < productIds.length; index++) {
+            const cart = await CartModel.findOne({where:{productId:productIds[index],deleted:false}});
+            if(cart){cart.deleted = true;cart.quantity = 0;cart.remark="ordered";await cart.save();}   
+        }
+        
        res.status(201).json(order); 
     } catch (error) {
         res.status(500).json({error:error.message});
