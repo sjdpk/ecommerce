@@ -38,9 +38,11 @@ const CartModel = db.cart;
 
     let orderBody = req.body.order;
     let productIds = [];
+    let productQty = [];
     if(orderBody.length<=0) return res.status(400).json({error:"order cannot be empty"});
     try {
         for (let i = 0; i < orderBody.length; i++) {
+            // @desc :  check if order json contains productid ,quantity price 
             const pid = !orderBody[i].hasOwnProperty('productId');
             const qty = !orderBody[i].hasOwnProperty('quantity');
             const price = !orderBody[i].hasOwnProperty('price');
@@ -48,9 +50,12 @@ const CartModel = db.cart;
             if(pid) return res.status(400).json({error:`order object ${i+1} must contain productId`}); 
             const product = await ProductModel.findOne({where:{id:orderBody[i].productId}});
             if(!product)  return res.status(404).json({error:`object ${i+1} product not found`});
+            // @desc : add product id into array : to remove from cart and decrease qtry from stock 
             productIds.push(orderBody[i]["productId"]);
             if(price) return res.status(400).json({error:`order object ${i+1} must contain price`}); 
             if(qty) orderBody[i]['quantity'] = 1; 
+            productQty.push(orderBody[i]["quantity"])
+
         }
         console.log(productIds);
         // @desc : wheather user is present or not
@@ -71,6 +76,11 @@ const CartModel = db.cart;
         for (let index = 0; index < productIds.length; index++) {
             const cart = await CartModel.findOne({where:{productId:productIds[index],deleted:false}});
             if(cart){cart.deleted = true;cart.quantity = 0;cart.remark="ordered";await cart.save();}   
+        }
+        // TODO : decrease product stock
+        for (let i = 0; i < productIds.length; i++) {
+            const product = await ProductModel.findOne({where:{id:productIds[i],deletedAt:null}});
+            if(product){product.productStock = product.productStock-productQty[i];await product.save();}   
         }
         
        res.status(201).json(order); 
