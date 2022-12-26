@@ -33,6 +33,8 @@ db.coupon = require('./coupon.model')(sequelize,DataTypes);
 db.order = require('./order.model')(sequelize,DataTypes);
 
 db.user = require('./user.model')(sequelize,DataTypes);
+db.favourite = require('./favourite.model')(sequelize,DataTypes);
+
 db.application = require('./app.model')(sequelize,DataTypes);
 
 
@@ -46,6 +48,7 @@ Cart = db.cart;
 Coupon = db.coupon;
 Order = db.order;
 User = db.user;
+Favourite = db.favourite;
 Banner = db.banner;
 
 
@@ -106,6 +109,15 @@ User.hasMany(Product,{
     foreignKey: 'vendorId'
 });
 Product.belongsTo(User,{foreignKey: 'vendorId'});
+
+
+
+User.hasMany(Favourite,{
+    foreignKey: 'userId'
+});
+Favourite.belongsTo(Department,{foreignKey: 'userId'});
+
+
 
 /* 
     *department and user relationship

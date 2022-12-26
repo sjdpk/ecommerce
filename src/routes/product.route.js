@@ -8,10 +8,12 @@ const {
     getProduct,
     updateProduct,
     deleteProduct,
+    addToFavourite,
 } = require('../controllers/product.controller')
 
 router.post('/product',AuthMiddleware.IsAuthenticated,upload.single('image'),createProduct);
 router.get('/product',getProducts);
+router.put('/fav-product',AuthMiddleware.IsAuthenticated,addToFavourite);
 router.get('/product/all',getAutoSugessionList);
 router.get('/product/:id',getProduct);
 router.put('/product/:id',AuthMiddleware.IsAuthenticated,upload.single('image'),updateProduct);
