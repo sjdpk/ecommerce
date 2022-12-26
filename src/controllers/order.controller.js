@@ -7,10 +7,11 @@ const PerPageLimit  = parseInt(process.env.PER_PAGE_LIMIT);
 const OrderStatus = {
     Ordered : 'ordered', //user order good
     Accept : 'accepted', //vendor accept or reject order
-    Reject : 'rejected',
     Prepare : 'preparing', //vendor make order prepare
     OnTheWay : 'ontheway', //The order is on its way to the recipient.
     Delivered : 'delivered',
+    Canceled : 'canceled', //user cancel good
+    Reject : 'rejected',
     ReturnRequest : 'returnrequest',
     Return : 'returned',
     undefined : undefined,
@@ -110,6 +111,7 @@ const getOrders= async (req,res)=>{
         const orders = await OrderModel.findAll({
             limit: PerPageLimit,
             offset :offset,
+            order: [['updatedAt', 'DESC']],
             where :condn,
         });
         const { totalPage,count } =await pagination(OrderModel,PerPageLimit, {where:condn});
@@ -161,6 +163,7 @@ const updateOrder =  async(req,res) => {
     try {
         const order =  await OrderModel.findOne({where : {id:orderId}});
         if(!order) return res.status(404).json({error:"order not found"});
+        if(status==='canceled' && !remark)  return res.status(400).json({error:"remark is required"});
         if(status==='rejected' && !remark)  return res.status(400).json({error:"remark is required"});
         if(status==='returnrequest' && !remark)  return res.status(400).json({error:"remark is required"});
         order.orderStatus = status;
@@ -173,10 +176,20 @@ const updateOrder =  async(req,res) => {
     }
 };
 
+// @desc : orders sataus List
+const orderStatusList = (req,res)=>{
+    try {
+        res.status(200).json(OrderStatus);
+    } catch (error) {
+      res.status(400).json({error:error.message});  
+    }
+}
 
 module.exports = {
     createOrder, 
     getOrders,
     getOrder,
     updateOrder,
+    orderStatusList,
+    
 }
