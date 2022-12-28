@@ -6,7 +6,6 @@ const { product } = require("../models/index");
 const sequelize = db.Sequelize;
 const { Op } = db.Sequelize;
 require('dotenv').config({ path: "config/config.env" });
-
 const jsonwebtoken = require('jsonwebtoken');
 
 
@@ -122,7 +121,6 @@ const getProducts = async (req, res) => {
     try {
         // @desc :  first fetch favourite product id's list
         let favList = await checkFavourite(req);
-
         const product = await ProductModel.findAll({
             where: condn,
             order: order,
@@ -160,6 +158,47 @@ const getProducts = async (req, res) => {
     }
 }
 
+
+const getFavProducts = async (req, res) => {
+    const currentpage = req.query.page ? parseInt(req.query.page) : 1;
+    try {
+        let favList = await checkFavourite(req);
+        const condn = { deletedAt: null, id: favList }
+        const product = await ProductModel.findAll({
+            where: condn,
+            limit: PerPageLimit,
+            attributes: ['id', 'name', 'slug', 'price', 'discountType', 'discount', 'image', 'vendorId'],
+            include: [{ model: db.user, attributes: ["first_name", "last_name"] }]
+        });
+        const { totalPage, count } = await pagination(ProductModel, PerPageLimit, { where: condn });
+        let productJson = [];
+        // check fav list
+        product.forEach(async (element) => {
+            productJson.push({
+                "id": element.id,
+                'name': element.name,
+                'slug': element.slug,
+                'price': element.price,
+                'discountType': element.discountType,
+                'discount': element.discount,
+                'image': `${req.protocol}://${req.get('host')}/${element.image}`,
+                'vendorId': element.vendorId,
+                'vendorname': element.user.first_name + " " + element.user.last_name,
+                'vedorimage': null,
+                "isFav": favList.includes(element.id) ? true : false
+            });
+        });
+        res.status(200).json({
+            currentpage: currentpage,
+            totalpage: totalPage,
+            count: count,
+            data: productJson,
+        });
+
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+}
 // @desc : get single visible product 
 // @route : /api/v1/product:id
 // @access : Public
@@ -355,7 +394,8 @@ async function checkFavourite(req) {
             if (!err) {
                 const userId = decoded.userId;
                 const fav = await FavouriteModel.findOne({ where: { userId: userId } });
-                favList = fav.favouriteList.reverse();
+                if (fav) favList = fav.favouriteList.reverse();
+
             }
         });
     }
@@ -367,6 +407,7 @@ module.exports = {
     createProduct,
     getProducts,
     getProduct,
+    getFavProducts,
     getAutoSugessionList,
     updateProduct,
     deleteProduct,

@@ -76,7 +76,7 @@ module.exports = (sequelize,DataTypes) => {
         },
         role:{
             type:DataTypes.INTEGER, //[0,1,2]- [admin,vendor,user]
-            defaultValue :process.env.NORMAL_USER_ID ||  2, 
+            defaultValue :  2, //user 
         },
         active:{
             type:DataTypes.BOOLEAN,
