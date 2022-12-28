@@ -97,6 +97,11 @@ const CartModel = db.cart;
 // @access : Private [ Vendor,Admin ]
 // @Method : [ GET ]
 const getOrders= async (req,res)=>{
+    const token = req.token;
+    const role = token.role;
+    const userId = token.userId;
+    const uuid = checkIfValidUUID(userId);
+    if (!uuid) return res.status(400).json({ error: "invalid id" });
     try {
         const currentPage = req.query.page?parseInt(req.query.page):1;
         const orderStatus = req.query.status;
@@ -107,7 +112,7 @@ const getOrders= async (req,res)=>{
 
        
         const offset = (parseInt(currentPage)-1)*PerPageLimit; 
-        const condn = orderStatus?{orderStatus : orderStatus}:{};
+        const condn = orderStatus?{orderStatus : orderStatus, userId: userId}:{ userId: userId};
         const orders = await OrderModel.findAll({
             limit: PerPageLimit,
             offset :offset,
@@ -134,11 +139,17 @@ const getOrders= async (req,res)=>{
 // @access : Private [ Vendor,Admin ]
 // @Method : [ GET ]
 const getOrder = async(req,res)=>{
+    const token = req.token;
+    const role = token.role;
+    const userId = token.userId;
+    const useruid = checkIfValidUUID(userId);
+    if (!useruid) return res.status(400).json({ error: "invalid id" });
+
     let id  = req.params.id;
     const uuid = checkIfValidUUID(id);
     if (!uuid) return res.status(400).json({error:"invalid id"});
     try {
-        const order =   await OrderModel.findOne({where: {id: id}});
+        const order =   await OrderModel.findOne({where: {id: id,userId:userId}});
         if(!order) return res.status(404).json({error:"order not found"});
         res.status(200).json(order);
     } catch (error) {
@@ -152,6 +163,13 @@ const getOrder = async(req,res)=>{
 // @access : Private [ Vendor,Admin ]
 // @Method : [ PUT ]
 const updateOrder =  async(req,res) => {
+    // @desc : get authentic user 
+    const token = req.token;
+    const role = token.role;
+    const userId = token.userId;
+    const useruid = checkIfValidUUID(userId);
+    if (!useruid) return res.status(400).json({ error: "invalid id" });
+
     let orderId = req.params.id;
     const uuid = checkIfValidUUID(orderId);
     if (!uuid) return res.status(400).json({error:"invalid id"});
@@ -161,7 +179,7 @@ const updateOrder =  async(req,res) => {
     if(!exists) return res.status(404).send({error:'status not found'});
     const remark = req.body.remark;
     try {
-        const order =  await OrderModel.findOne({where : {id:orderId}});
+        const order =  await OrderModel.findOne({where : {id:orderId ,userId:userId}});
         if(!order) return res.status(404).json({error:"order not found"});
         if(status==='canceled' && !remark)  return res.status(400).json({error:"remark is required"});
         if(status==='rejected' && !remark)  return res.status(400).json({error:"remark is required"});
