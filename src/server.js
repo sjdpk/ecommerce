@@ -11,6 +11,7 @@ const orderRoute = require('./routes/order.route');
 const BannerRoute = require('./routes/banner.route');
 const AppRoute = require('./routes/app.route');
 const DashboardRoute = require('./routes/dashboard.route');
+const PopularRoute = require('./routes/popular.route');
 
 
 //load env variable
@@ -31,6 +32,7 @@ app.use('/api/v1',orderRoute);
 app.use('/api/v1',BannerRoute);
 app.use('/api/v1',AppRoute);
 app.use('/api/v1',DashboardRoute);
+app.use('/api/v1',PopularRoute);
 // app.use('/api/v1/sub-category',subCategoryRoute);
 
 const PORT = process.env.PORT || 4000;

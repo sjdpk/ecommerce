@@ -26,6 +26,7 @@ db.subSubcategory = require('./category.model')(sequelize,DataTypes,'subsubcateg
 
 db.department = require('./department.model')(sequelize,DataTypes);
 db.banner = require('./banner.model')(sequelize,DataTypes);
+db.popular = require('./popular.model')(sequelize,DataTypes);
 
 db.product = require('./product.model')(sequelize,DataTypes);
 db.cart = require('./cart.model')(sequelize,DataTypes);
@@ -50,6 +51,7 @@ Order = db.order;
 User = db.user;
 Favourite = db.favourite;
 Banner = db.banner;
+Popular = db.popular;
 
 
 /* 1.one category have many sub category but 

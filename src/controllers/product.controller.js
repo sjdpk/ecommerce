@@ -26,7 +26,7 @@ FavouriteModel = db.favourite;
 const createProduct = async (req, res) => {
     const token = req.token;
     const role = token.role;
-    if (role != 1) return res.status(401).json({ error: "you have to access to add product" });
+    if (role != 1) return res.status(401).json({ error: "unauthorized request" });
     const vendorId = token.userId;
     const uuid = checkIfValidUUID(vendorId);
     if (!uuid) return res.status(400).json({ error: "invalid id" });
@@ -343,11 +343,22 @@ const addToFavourite = async (req, res) => {
     const productId = req.body.productId;
     try {
         const fav = await FavouriteModel.findOne({ where: { userId: userId } });
-        const isFav = fav.favouriteList.includes(productId);
-        if (!isFav) { fav.favouriteList = [...fav.favouriteList, productId]; }
-        if (isFav) { fav.favouriteList = fav.favouriteList.filter(item => item !== productId) }
-        await fav.save();
-        res.status(200).json(fav);
+        if (fav) {
+            const isFav = fav.favouriteList.includes(productId);
+            if (!isFav) { fav.favouriteList = [...fav.favouriteList, productId]; }
+            if (isFav) { fav.favouriteList = fav.favouriteList.filter(item => item !== productId) }
+            await fav.save();
+            res.status(200).json(fav);
+
+        }else {
+            const favData = {
+                userId:userId,
+                favouriteList :[productId],
+            };
+            const addFav = await FavouriteModel.create(favData);
+            res.status(200).json(addFav);
+        }
+
 
     } catch (error) {
         res.status(400).json({ error: error.message });

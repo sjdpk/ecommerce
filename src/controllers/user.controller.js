@@ -81,7 +81,7 @@ const getUsers = async (req, res) => {
             limit: PerPageLimit,
             offset: offset,
             where: condn,
-            attributes: ["id", "first_name", "middle_name", "last_name", "email", "phone_number", "address", "createdAt"],
+            attributes: ["id", "first_name", "middle_name", "last_name", "email", "phone_number", "address", "createdAt","role","active"],
         });
         const { totalPage, count } = await pagination(UserModel, PerPageLimit, { where: condn });
         res.status(200).json({
