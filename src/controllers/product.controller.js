@@ -37,7 +37,7 @@ const createProduct = async (req, res) => {
     let subcategoryId = req.body.subcategoryId;
     let subsubcategoryId = req.body.subsubcategoryId;
     let departmentId = req.body.departmentId;
-    if (!departmentId) return res.status(400).json({ error: "departmentId is required" });
+    // if (!departmentId) return res.status(400).json({ error: "departmentId is required" });
 
     if (!categoryId) categoryId = null;
     if (!subcategoryId) subcategoryId = null;
@@ -45,8 +45,8 @@ const createProduct = async (req, res) => {
     if (categoryId === null && subcategoryId === null && subsubcategoryId === null) return res.status(400).json({ error: "please select category" });
 
     try {
-        const department = await DepartModel.findOne({ where: { id: departmentId } });
-        if (!department) return res.status(404).json({ error: "department not found" });
+        // const department = await DepartModel.findOne({ where: { id: departmentId } });
+        // if (!department) return res.status(404).json({ error: "department not found" });
         const { category_Id, subcategory_Id, subsubcategory_Id } = await categoryHandler(res, categoryId, subcategoryId, subsubcategoryId);
         const additionalInfo = req.body.additionalInfo;
         let productData = {
@@ -56,7 +56,7 @@ const createProduct = async (req, res) => {
             subcategoryId: subcategory_Id,
             subsubcategoryId: subsubcategory_Id,
             price: req.body.price,
-            departmentId: req.body.departmentId,
+            // departmentId: req.body.departmentId,
             productStock: req.body.productStock,
             discountType: req.body.discountType,
             discount: req.body.discount,
@@ -216,7 +216,7 @@ const getProduct = async (req, res) => {
                 { model: db.category, attributes: ["name"] },
                 { model: db.subcategory, attributes: ["name"] },
                 { model: db.subSubcategory, attributes: ["name"] },
-                { model: db.department, attributes: ["departmentName"] },
+                // { model: db.department, attributes: ["departmentName"] },
             ],
         });
         if (!product) return res.status(404).json({ error: "product not found" });
@@ -243,8 +243,8 @@ const getProduct = async (req, res) => {
             "subcategoryName": product.subcategory != null ? product.subcategory.name : null,
             "subsubcategoryId": product.subsubcategoryId,
             "subsubcategoryName": product.subsubcategory != null ? product.subsubcategory.name : null,
-            "departmentId": product.departmentId,
-            "departmentName": product.department.departmentName,
+            // "departmentId": product.departmentId,
+            // "departmentName": product.department.departmentName,
             "isFav": favList.includes(product.id) ? true : false
         }
         res.status(200).json(productResponse);
