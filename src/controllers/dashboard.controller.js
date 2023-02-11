@@ -8,6 +8,9 @@ const ProductModel = db.product;
 const UserModel = db.user;
 const FavouriteModel = db.favourite;
 
+const OrderModel = db.order;
+const PaymentModel = db.payment;
+
 
 
 const dashboard = async (req, res) => {
@@ -77,4 +80,41 @@ async function checkFavourite(req) {
 }
 
 
-module.exports = { dashboard };
+const vendorDashboard = async(req,res)=>{
+    const paymentDataYear = req.body.year;
+    try {
+        const statuses = ['ordered', 'accepted', 'preparing', 'ontheway', 'delivered', 'returnrequest'];
+        const orderCounts = await Promise.all(statuses.map(status => OrderModel.count({ where: { orderStatus: status } })));
+        const orderCountMap = {};
+        statuses.forEach((status, index) => {
+          orderCountMap[status] = orderCounts[index];
+        });
+      
+        const payment = await PaymentModel.findAll({});
+        let totalAmountByMonth = {};
+        const currentYear = new Date().getFullYear();
+        for (const entry of payment) {
+          const date = new Date(entry.createdAt);
+          const year = date.getFullYear();
+          const compareYear = paymentDataYear?paymentDataYear:currentYear;
+          if (year !== compareYear) {
+            continue;
+          }
+          const month = date.getMonth() + 1;
+          const key = `${year}-${month}`;
+          if (key in totalAmountByMonth) {
+            totalAmountByMonth[key] += entry.amount;
+          } else {
+            totalAmountByMonth[key] = entry.amount;
+          }
+        }
+        res.status(200).json({
+          order: orderCountMap,
+          payment: totalAmountByMonth
+        });
+      } catch (error) {
+        res.status(400).json({ error: error.message });
+      }      
+}
+
+module.exports = { dashboard,vendorDashboard };

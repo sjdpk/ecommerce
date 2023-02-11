@@ -26,6 +26,7 @@ const createPayment = async (req, res) => {
             userId :userId,
             vendorId : req.body.vendorId,
             orderId : req.body.orderId,
+            amount: req.body.amount,
             remark:  req.body.remark,
         };
         // make payemnt status true in order table

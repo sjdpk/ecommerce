@@ -36,6 +36,15 @@ module.exports = (sequelize,DataTypes)=>{
                 }
             }
         },
+        amount : {
+            type : DataTypes.DOUBLE,
+            allowNull:false,
+            validate : {
+                notNull : {
+                    msg:"amount can not be empty"
+                }
+            }
+        },
         remark : DataTypes.STRING,
     });
     return Payment;
