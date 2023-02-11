@@ -2,6 +2,8 @@ const db = require('../models');
 require('dotenv').config({ path: "config/config.env" });
 const pagination = require('../config/pagination.handler');
 const { checkIfValidUUID } = require('../config/common.config');
+const {generateNotification} =  require('./notification.controller')
+
 
 const PerPageLimit = parseInt(process.env.PER_PAGE_LIMIT);
 const OrderStatus = {
@@ -78,12 +80,13 @@ const createOrder = async (req, res) => {
             const cart = await CartModel.findOne({ where: { productId: productIds[index], deleted: false } });
             if (cart) { cart.deleted = true; cart.quantity = 0; cart.remark = "ordered"; await cart.save(); }
         }
-        // TODO : decrease product stock
+        // @desc : decrease product stock
         for (let i = 0; i < productIds.length; i++) {
             const product = await ProductModel.findOne({ where: { id: productIds[i], deletedAt: null } });
             if (product) { product.productStock = product.productStock - productQty[i]; await product.save(); }
         }
-
+        
+        
         res.status(201).json(order);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -302,6 +305,11 @@ const updateOrder = async (req, res) => {
         order.remark = remark;
 
         await order.save();
+        // create notification
+        const data = {
+            orderId: order.id,
+        };
+       await generateNotification(`order status change to ${status}`,order.userId,data)
         res.status(200).json(order);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -320,6 +328,7 @@ const updateOrderPaymentStatus = async (req, res) => {
         if (!order) return res.status(404).json({ error: "order not found" });
         order.paymentStatus = req.body.paymentStatus?req.body.paymentStatus:false;
         await order.save();
+        
         res.status(200).json(order);
     } catch (error) {
         res.status(500).json({ error: error.message });

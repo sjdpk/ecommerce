@@ -14,8 +14,7 @@ const NotificationModel = db.notification;
 // @Method : [ POST ]
 const createNotification = async (req, res) => {
     const token = req.token;
-    // const role = token.role;
-    const userId = token.userId;
+    const userId = req.body.userId;
     const uuid = checkIfValidUUID(userId);
     if (!uuid) return res.status(400).json({error:"invalid user id"});
 
@@ -35,6 +34,24 @@ const createNotification = async (req, res) => {
     }
 }
 
+// @desc :  function from where we can call and generate notification
+const generateNotification = async (notif, userId, data) => {
+    const uuid = checkIfValidUUID(userId);
+    if (!uuid) return console.error("Invalid user id");
+
+    try {
+        let notificationRequest = {
+            "notification": notif,
+            "userId": userId,
+            "data": data,
+        };
+
+        const notification = await NotificationModel.create(notificationRequest);
+        console.log("Notification created successfully:", notification);
+    } catch (error) {
+        console.error("Error creating notification:", error.message);
+    }
+};
 // @desc : get notification List
 // @route : /api/v1/notification
 // @access : Private 
@@ -112,4 +129,5 @@ module.exports = {
     getNotifications,
     updateNotificationSeen,
     countUnSeenNotification,
+    generateNotification,
 };
