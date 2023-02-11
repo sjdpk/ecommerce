@@ -31,7 +31,8 @@ const CartModel = db.cart;
 const createOrder = async (req, res) => {
     // let userId = req.body.userId;
     const token = req.token;
-    const role = token.role;
+    const role = parseInt(token.role);
+    // role 2 customer
     if (role != 2) return res.status(401).json({ error: "unauthorized" });
     const userId = token.userId;
     const uuid = checkIfValidUUID(userId);

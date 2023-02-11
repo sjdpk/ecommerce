@@ -125,7 +125,7 @@ const getProducts = async (req, res) => {
             where: condn,
             order: order,
             limit: PerPageLimit,
-            attributes: ['id', 'name', 'slug', 'price', 'discountType', 'discount', 'image', 'vendorId'],
+            attributes: ['id', 'name', 'slug', 'price', 'discountType', 'discount', 'image', 'vendorId','categoryId','subcategoryId'],
             include: [{ model: db.user, attributes: ["first_name", "last_name"] }]
         });
         const { totalPage, count } = await pagination(ProductModel, PerPageLimit, { where: condn });
@@ -142,6 +142,8 @@ const getProducts = async (req, res) => {
                 'discount': element.discount,
                 'image': `${req.protocol}://${req.get('host')}/${element.image}`,
                 'vendorId': element.vendorId,
+                'categoryId': element.categoryId,
+                'subcategoryId': element.subcategoryId,
                 'vendorname': element.user.first_name + " " + element.user.last_name,
                 'vedorimage': null,
                 "isFav": favList.includes(element.id) ? true : false
@@ -167,7 +169,7 @@ const getFavProducts = async (req, res) => {
         const product = await ProductModel.findAll({
             where: condn,
             limit: PerPageLimit,
-            attributes: ['id', 'name', 'slug', 'price', 'discountType', 'discount', 'image', 'vendorId'],
+            attributes: ['id', 'name', 'slug', 'price', 'discountType', 'discount', 'image', 'vendorId','categoryId','subcategoryId'],
             include: [{ model: db.user, attributes: ["first_name", "last_name"] }]
         });
         const { totalPage, count } = await pagination(ProductModel, PerPageLimit, { where: condn });
@@ -183,6 +185,8 @@ const getFavProducts = async (req, res) => {
                 'discount': element.discount,
                 'image': `${req.protocol}://${req.get('host')}/${element.image}`,
                 'vendorId': element.vendorId,
+                'categoryId': element.categoryId,
+                'subcategoryId': element.subcategoryId,
                 'vendorname': element.user.first_name + " " + element.user.last_name,
                 'vedorimage': null,
                 "isFav": favList.includes(element.id) ? true : false
@@ -227,11 +231,11 @@ const getProduct = async (req, res) => {
             "slug": product.slug,
             "description": product.description,
             "price": product.price,
-            "productStock": product.productStock,
+            "productStock": product.productStock<0?0:product.productStock,
             "discountType": product.discountType,
             "discount": product.discount,
             "visibility": product.visibility,
-            "image": `${req.protocol}://${req.get('host')}/${product.image}`,
+            "image": [product.image.includes("http")?product.image:`${req.protocol}://${req.get('host')}/${product.image}`],
             "additionalInfo": product.additionalInfo,
             "vendorId": product.vendorId,
             "vendorName": product.user.first_name + " " + product.user.last_name,

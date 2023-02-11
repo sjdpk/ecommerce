@@ -37,6 +37,8 @@ db.user = require('./user.model')(sequelize,DataTypes);
 db.favourite = require('./favourite.model')(sequelize,DataTypes);
 
 db.application = require('./app.model')(sequelize,DataTypes);
+db.notification = require('./notification.model')(sequelize,DataTypes);
+db.payment = require('./payment.model')(sequelize,DataTypes);
 
 
 // Associations
@@ -52,6 +54,9 @@ User = db.user;
 Favourite = db.favourite;
 Banner = db.banner;
 Popular = db.popular;
+Notif = db.notification;
+Payment = db.payment;
+
 
 
 /* 1.one category have many sub category but 
@@ -190,6 +195,29 @@ User.hasOne(Banner);
 Banner.belongsTo(Category);
 Banner.belongsTo(Product);
 Banner.belongsTo(User);
+
+/*
+    * user and notification relationship
+    * one user have many notification
+    * relation [ Many-To-Many ]
+*/
+
+User.hasMany(Notif);
+Notif.belongsTo(User);
+
+User.hasMany(Payment,{
+    foreignKey: "userId",
+ });
+ Payment.belongsTo(User);
+
+ User.hasMany(Payment,{
+    foreignKey: "vendorId",
+ });
+ Payment.belongsTo(User);
+
+ Order.hasOne(Payment);
+ Payment.belongsTo(Order);
+
 
 // sysncing database
 db.sequelize.sync({force:false}).then(()=>{

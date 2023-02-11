@@ -17,6 +17,9 @@ const CategoryModel = db.category;
 // @access : Private [ Vendor, Admin ]
 // @Method : [ POST ]
 const createBanner = async (req, res) => {
+    const token = req.token;
+    const role = token.role;
+    if (role != 0) return res.status(401).json({ error: "unauthorized request" });
     if(req.file == null) return res.status(400).json({error:"select image"});
     const categoryId = req.body.categoryId;
     
@@ -59,6 +62,9 @@ const createBanner = async (req, res) => {
 const getBanners = async (req, res) => {
     try {
         const { count, rows } = await BannerModel.findAndCountAll({});
+        rows.map(function(el) { 
+            el.banner = `${req.protocol}://${req.get('host')}/${el.banner}`
+        });
         res.status(200).json({
             count: count,
             data: rows
@@ -77,6 +83,7 @@ const getBanner = async (req, res) => {
     try {
         const banner = await BannerModel.findOne({ where: { id: id } });
         if (!banner) return res.status(404).json({ error: "banner not found" });
+        banner.banner = `${req.protocol}://${req.get('host')}/${banner.banner}`
         res.status(200).json(banner);
 
     } catch (error) {
