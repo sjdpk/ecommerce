@@ -27,6 +27,10 @@ module.exports = (sequelize,DataTypes)=>{
             type: DataTypes.STRING,
             defaultValue: 'ordered',
         },
+        paymentStatus : {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+        },
         remark : DataTypes.STRING,
         userName: DataTypes.STRING,
         email: DataTypes.STRING,

@@ -207,6 +207,46 @@ const getOrders = async (req, res) => {
     }
 }
 
+// @desc : Get All product Order List
+// @route : /api/v1/order?status=ordered [status from ORDERSTATUS Map ^ ]
+// @access : Private [ user, Vendor,Admin ]
+// @Method : [ GET ]
+const getOrdersByVendor = async (req, res) => {
+    const token = req.token;
+    const role = token.role;
+    const userId = token.userId;
+    const uuid = checkIfValidUUID(userId);
+    if (!uuid) return res.status(400).json({ error: "invalid id" });
+    if(role != 1) return res.status(400).json({ error: "unauthorized access" });
+    try {
+        const currentPage = req.query.page ? parseInt(req.query.page) : 1;
+        const orderStatus = req.query.status;
+        const exists = Object.values(OrderStatus).includes(orderStatus);
+
+        if (!exists) return res.status(400).send({ error: "status type not found" });
+        if (currentPage <= 0) return res.status(400).send({ error: "invalid page" });
+
+
+        const offset = (parseInt(currentPage) - 1) * PerPageLimit;
+        const condn = { orderStatus: orderStatus };
+        const orders = await OrderModel.findAll({
+            limit: PerPageLimit,
+            offset: offset,
+            order: [['updatedAt', 'DESC']],
+            where: condn,
+        });
+        const { totalPage, count } = await pagination(OrderModel, PerPageLimit, { where: condn });
+
+        res.status(200).json({
+            currentpage: currentPage,
+            totalpage: totalPage,
+            count: count,
+            data: orders,
+        });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+}
 
 // @desc : Get Single product Order 
 // @route : /api/v1/order/orderId
@@ -268,6 +308,25 @@ const updateOrder = async (req, res) => {
     }
 };
 
+
+const updateOrderPaymentStatus = async (req, res) => {
+    // @desc : get authentic user 
+    checkAndReturnUserId(req)
+    let orderId = req.params.id;
+    const uuid = checkIfValidUUID(orderId);
+    if (!uuid) return res.status(400).json({ error: "invalid id" });
+    try {
+        const order = await OrderModel.findOne({ where: { id: orderId, userId: userId } });
+        if (!order) return res.status(404).json({ error: "order not found" });
+        order.paymentStatus = req.body.paymentStatus?req.body.paymentStatus:false;
+        await order.save();
+        res.status(200).json(order);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 // @desc : orders sataus List
 const orderStatusList = (req, res) => {
     try {
@@ -277,6 +336,15 @@ const orderStatusList = (req, res) => {
     }
 }
 
+
+function checkAndReturnUserId(req){
+    const token = req.token;
+    const role = token.role;
+    const userId = token.userId;
+    const useruid = checkIfValidUUID(userId);
+    if (!useruid) return res.status(400).json({ error: "invalid id" });  
+    return userId;
+}
 module.exports = {
     createOrder,
     getOrders,
@@ -284,5 +352,7 @@ module.exports = {
     updateOrder,
     orderStatusList,
     getProductWiseOrderByVendor,
+    updateOrderPaymentStatus,
+    getOrdersByVendor,
 
 }
