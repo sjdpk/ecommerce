@@ -71,14 +71,14 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 
 ## Credits
 
-- **Author**: [Your Name](https://github.com/sjdpk)
+- **Author**: [Deepak Sapkota](https://github.com/sjdpk)
 - **Contributors**: []
 
 ## Contact
 
 If you have any questions or feedback, feel free to reach out:
 
-- **Email**: mail@sapkotadeepak.com.np
+- **Email**:[mail@me](mailto:mail@sapkotadeepak.com.np)  
 - **GitHub**: [sjdpk](https://github.com/sjdpk)
 - **LinkedIn**: [Deepak](https://www.linkedin.com/in/deepaksapkota)
 
