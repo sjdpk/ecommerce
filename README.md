@@ -1,7 +1,3 @@
-Thank you for sharing your GitHub repository URL! I took a quick look at your `ecommerce` project, and based on the structure and files, I can create a `README.md` file for you. Here's a draft:
-
----
-
 # Ecommerce Project
 
 Welcome to the **Ecommerce Project**! This is a full-stack e-commerce application built with modern web technologies. It provides a platform for users to browse products, add them to a cart, and complete purchases.
@@ -75,18 +71,15 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 
 ## Credits
 
-- **Author**: [Your Name](https://github.com/sjdpk)
-- **Inspiration**: [Any inspiration or references]
-- **Contributors**: [List of contributors, if any]
+- **Author**: [Deepak Sapkota](https://github.com/sjdpk)
+- **Contributors**: []
 
 ## Contact
 
 If you have any questions or feedback, feel free to reach out:
 
-- **Email**: [Your Email Address]
+- **Email**:[mail@me](mailto:mail@sapkotadeepak.com.np)  
 - **GitHub**: [sjdpk](https://github.com/sjdpk)
-- **LinkedIn**: [Your LinkedIn Profile, if applicable]
+- **LinkedIn**: [Deepak](https://www.linkedin.com/in/deepaksapkota)
 
 ---
-
-Let me know if you'd like to make any changes or add more details! Once you're happy with it, you can copy and paste this into a `README.md` file in your repository.
