@@ -1,4 +1,5 @@
 const db = require('../models');
+const {checkIfValidUUID} = require('../config/common.config');
 
 // create main models
 const DepartmentModel = db.department;
@@ -10,12 +11,19 @@ const UserModel = db.user;
 // @access : Private [ Vendor, Admin ]
 // @Method : [ POST ]
 const createDepartment = async (req, res) => {
+    const token = req.token;
+    const role = token.role;
+    if(role !=1) return res.status(401).json({error:"unauthorized"});
+    const departmentHeadId = token.userId;
+    const uuid = checkIfValidUUID(departmentHeadId);
+    if (!uuid) return res.status(400).json({error:"invalid id"});
+
     try {
         const user = await UserModel.findOne({where :{id:departmentHeadId}});
         if(!user) return res.status(404).json({error:"user not found"});
         let departmentData = {
             departmentName: req.body.departmentName,
-            departmentHeadId: req.body.departmentHeadId,
+            departmentHeadId: departmentHeadId,
         };
         const department = await DepartmentModel.create(departmentData);
         res.status(201).json(department);
@@ -82,7 +90,7 @@ const deleteDepartment = async (req, res) => {
     try {
         const deparment = await DepartmentModel.destroy({ where: { id: id } });
         if (!deparment) return res.status(404).json({ error: "department not found" });
-        res.status(204).send({ msg: "product deleted sucessfully" });
+        res.status(204).send({ msg: "department deleted sucessfully" });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

@@ -25,6 +25,8 @@ db.subcategory = require('./category.model')(sequelize,DataTypes,'subcategory');
 db.subSubcategory = require('./category.model')(sequelize,DataTypes,'subsubcategory');
 
 db.department = require('./department.model')(sequelize,DataTypes);
+db.banner = require('./banner.model')(sequelize,DataTypes);
+db.popular = require('./popular.model')(sequelize,DataTypes);
 
 db.product = require('./product.model')(sequelize,DataTypes);
 db.cart = require('./cart.model')(sequelize,DataTypes);
@@ -32,6 +34,11 @@ db.coupon = require('./coupon.model')(sequelize,DataTypes);
 db.order = require('./order.model')(sequelize,DataTypes);
 
 db.user = require('./user.model')(sequelize,DataTypes);
+db.favourite = require('./favourite.model')(sequelize,DataTypes);
+
+db.application = require('./app.model')(sequelize,DataTypes);
+db.notification = require('./notification.model')(sequelize,DataTypes);
+db.payment = require('./payment.model')(sequelize,DataTypes);
 
 
 // Associations
@@ -44,6 +51,12 @@ Cart = db.cart;
 Coupon = db.coupon;
 Order = db.order;
 User = db.user;
+Favourite = db.favourite;
+Banner = db.banner;
+Popular = db.popular;
+Notif = db.notification;
+Payment = db.payment;
+
 
 
 /* 1.one category have many sub category but 
@@ -54,14 +67,12 @@ User = db.user;
 */
 Category.hasMany(SubCategory,{
     foreignKey: 'categoryId',
-    as:'subcategory',
     allowNull: false,
   });
 SubCategory.belongsTo(Category);
 
 SubCategory.hasMany(SubSubCategory,{
     foreignKey: 'subcategoryId',
-    as:'subsubcategory',
     allowNull: false,
   });
 SubSubCategory.belongsTo(SubCategory);
@@ -75,20 +86,17 @@ SubSubCategory.belongsTo(SubCategory);
   * relation : [ product belongsTo Category ]
 */
 Category.hasMany(Product,{
-    foreignKey: 'categoryId',
-    as:'category',
+    foreignKey: 'categoryId'
 });
 Product.belongsTo(Category);
 
 SubCategory.hasMany(Product,{
-    foreignKey: 'subcategoryId',
-    as:'subcategory',
+    foreignKey: 'subcategoryId'
 });
 Product.belongsTo(SubCategory);
 
 SubSubCategory.hasMany(Product,{
-    foreignKey: 'subsubcategoryId',
-    as:'subsubcategory',
+    foreignKey: 'subsubcategoryId'
 });
 Product.belongsTo(SubSubCategory);
 
@@ -100,10 +108,22 @@ Product.belongsTo(SubSubCategory);
   * relation : [ product belongsTo Department ]
 */
 Department.hasMany(Product,{
-    foreignKey: 'departmentId',
-    as:'department',
+    foreignKey: 'departmentId'
 });
-Product.belongsTo(Department);
+Product.belongsTo(Department,{foreignKey: 'departmentId'});
+
+User.hasMany(Product,{
+    foreignKey: 'vendorId'
+});
+Product.belongsTo(User,{foreignKey: 'vendorId'});
+
+
+
+User.hasMany(Favourite,{
+    foreignKey: 'userId'
+});
+Favourite.belongsTo(Department,{foreignKey: 'userId'});
+
 
 
 /* 
@@ -114,10 +134,9 @@ Product.belongsTo(Department);
     *relation [department belongs to user]
 */
 User.hasMany(Department,{
-    foreignKey:'departmentHeadId',
-    as:'user',
+    foreignKey:'departmentHeadId'
 });
-Department.belongsTo(User);
+Department.belongsTo(User,{foreignKey:'departmentHeadId'});
 
 /*
     * product and coupon relationship
@@ -125,6 +144,13 @@ Department.belongsTo(User);
     * one product have many coupon
     * relation [ Many-To-Many ]
 */
+
+User.hasMany(Coupon,{
+    foreignKey: 'issuedBy'
+});
+Coupon.belongsTo(User,{foreignKey: 'issuedBy'});
+
+
 Coupon.belongsToMany(Product, { through: 'coupon_product' });
 Product.belongsToMany(Coupon, { through: 'coupon_product' });
 
@@ -136,6 +162,61 @@ Product.belongsToMany(Coupon, { through: 'coupon_product' });
 */
 Coupon.belongsToMany(Category, { through: 'coupon_category' });
 Category.belongsToMany(Coupon, { through: 'coupon_category' });
+
+
+/**
+ * Cart and user relationship
+ * one user have only one cart
+ * one cart belong to one person
+ * relation [ one to one ]
+ */
+User.hasOne(Cart);
+Cart.belongsTo(User);
+ /**
+  * User and Order Relationship
+  * user have one or many order
+  * one order belongs to one user
+  * relation [ one to many]
+  */
+ User.hasMany(Order,{
+    foreignKey: "userId",
+    as :"userorder",
+ });
+ Order.belongsTo(User);
+
+/**
+ * Banner Must contain category,productid,userId
+ * Banner may have one of the above
+ * Banner have One Category,ProductId,UserId
+ */
+Category.hasOne(Banner);
+Product.hasOne(Banner);
+User.hasOne(Banner);
+Banner.belongsTo(Category);
+Banner.belongsTo(Product);
+Banner.belongsTo(User);
+
+/*
+    * user and notification relationship
+    * one user have many notification
+    * relation [ Many-To-Many ]
+*/
+
+User.hasMany(Notif);
+Notif.belongsTo(User);
+
+User.hasMany(Payment,{
+    foreignKey: "userId",
+ });
+ Payment.belongsTo(User);
+
+ User.hasMany(Payment,{
+    foreignKey: "vendorId",
+ });
+ Payment.belongsTo(User);
+
+ Order.hasOne(Payment);
+ Payment.belongsTo(Order);
 
 
 // sysncing database

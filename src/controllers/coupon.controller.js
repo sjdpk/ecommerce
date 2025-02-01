@@ -14,6 +14,11 @@ const DISCOUNTSTATUS = {
 // @access : Private [ Vendor, Admin ]
 // @Method : [ POST ]
 const createCoupon = async (req, res) => {
+    const token = req.token;
+    const role = token.role;
+    const userId = token.userId;
+    const uuid = checkIfValidUUID(userId);
+    if (!uuid) return res.status(400).json({error:"invalid id"});
     const exists =  checkDiscountType(req);
     if(!exists) return res.status(400).json({error:"coupon type must be percentage or fixed"});
     try {
@@ -24,9 +29,10 @@ const createCoupon = async (req, res) => {
             visibility: req.body.visibility,
             discountType: req.body.discountType,
             discount: req.body.discount,
-
+            issuedBy:userId,
         };
         const coupon = await CouponModel.create(couponData);
+        coupon.deletedAt = undefined;
         res.status(201).json(coupon);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -39,7 +45,10 @@ const createCoupon = async (req, res) => {
 // @Method : [ GET ]
 const getCoupons = async (req, res) => {
     try {
-        const { count, rows } = await CouponModel.findAndCountAll({where:{deletedAt :null}});
+        const { count, rows } = await CouponModel.findAndCountAll({
+            where:{deletedAt :null},
+            attributes : { exclude : ['deletedAt']},
+        });
         res.status(200).json({
             count: count,
             data: rows
@@ -60,8 +69,8 @@ const getCoupon = async (req, res) => {
     try {
         const coupon = await CouponModel.findOne({ where: { id: id ,deletedAt:null} });
         if (!coupon) return res.status(404).send({ error: "coupon not found" });
+        coupon.deletedAt = undefined;
         res.status(200).json(coupon);
-
     } catch (error) {
         res.status(400).send({ error: error.message });
     }
@@ -82,6 +91,7 @@ const updateCoupon = async (req, res) => {
         const coupon = await CouponModel.findOne({ where: { id: id ,deletedAt:null} });
         if (!coupon) return res.status(404).send({ error: "coupon not found" });
         await coupon.update(req.body, { where: { id: id } });
+        coupon.deletedAt = undefined;
         res.status(200).json(coupon);
     } catch (error) {
         res.status(500).json({ error: error.message });

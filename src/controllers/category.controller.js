@@ -18,7 +18,7 @@ const createCategory = async(req,res)=>{
     if(req.file == null) return res.status(400).json({error:"select image"});
     let categoryData = {
         name:req.body.name.trim(),
-        image:`${req.protocol}://${req.get('host')}/${req.file.path}`,
+        image:req.file.path,
     }
     try {
         const category = await Category.create(categoryData);
@@ -35,7 +35,7 @@ const createCategory = async(req,res)=>{
 const createSubCategory = async(req,res)=>{
     const categoryId = req.body.categoryId;
     if(!categoryId) return res.status(400).json({error:"categoryId is required"});
-    const imagePath =req.file !=null?`${req.protocol}://${req.get('host')}/${req.file.path}`:null;
+    const imagePath =req.file !=null?req.file.path:null;
     let subCategoryData = {
         name:req.body.name,
         image:imagePath,
@@ -56,7 +56,7 @@ const createSubCategory = async(req,res)=>{
 const createSubSubCategory = async(req,res)=>{
     const subcategoryId = req.body.subcategoryId;
     if(!subcategoryId) return res.status(400).json({error:"subcategoryId is required"});
-    const imagePath =req.file !=null?`${req.protocol}://${req.get('host')}/${req.file.path}`:null;
+    const imagePath =req.file !=null?req.file.path:null;
     let subCategoryData = {
         name:req.body.name,
         image:imagePath,
@@ -77,7 +77,7 @@ async function update(req,res,DbModel,label="id"){
     if(!data) return res.status(404).json({error:`${label} not found`});
     data.set( {
         name:req.body.name !=null?req.body.name.trim():data.name,
-        image:req.file!=null?`${req.protocol}://${req.get('host')}/${req.file.path}`:data.image,
+        image:req.file!=null?req.file.path:data.image,
     })
     await data.save();
     res.status(200).json(data);
@@ -114,11 +114,14 @@ const updateSubSubCategory = async(req,res)=>{
 // @route : /api/v1/category
 // @access : Public 
 // @Method : [ Get ]
-async function fetch(res,DbModel,condn={}){
-    const { count, rows } = await DbModel.findAndCountAll({
+async function fetch(req,res,DbModel,condn={}){
+    let { count, rows } = await DbModel.findAndCountAll({
         where: condn,
         attributes : { exclude : ['createdAt','updatedAt']},
       });
+      rows.forEach(element=>{
+        element.image =element.image? `${req.protocol}://${req.get('host')}/${element.image}`:element.image
+    });
       res.status(200).json({count:count,data:rows});
 }
 
@@ -128,13 +131,13 @@ const getCategories = async(req,res)=>{
         const subcategoryId =  req.query.subcategoryId;
         if (categoryId) {
             const condn = { visibility:true,categoryId:categoryId };
-          return  await fetch(res,SubCategory,condn);
+            return  await fetch(req,res,SubCategory,condn);
         }
         if(subcategoryId){
             const condn = { visibility:true,subcategoryId:subcategoryId };
-          return  await fetch(res,SubSubCategory,condn);
+          return  await fetch(req,res,SubSubCategory,condn);
         }
-        await fetch(res,Category,{visibility:true});
+        await fetch(req,res,Category,{visibility:true});
     } catch (error) {
         res.status(500).json({"error":error.message});
     }
